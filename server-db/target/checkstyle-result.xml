@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-db/src/main/java/ee/cyber/cdoc2/server/model/entity/AuditEntity.java">
+</file>
+<file name="/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-db/src/main/java/ee/cyber/cdoc2/server/model/entity/KeyShareNonceDb.java">
+</file>
+<file name="/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-db/src/main/java/ee/cyber/cdoc2/server/model/entity/KeyShareDb.java">
+</file>
+<file name="/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-db/src/main/java/ee/cyber/cdoc2/server/model/repository/KeyShareNonceRepository.java">
+</file>
+<file name="/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-db/src/main/java/ee/cyber/cdoc2/server/model/repository/KeyShareRepository.java">
+</file>
+</checkstyle>

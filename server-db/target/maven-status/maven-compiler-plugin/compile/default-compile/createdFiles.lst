@@ -1,0 +1,5 @@
+ee/cyber/cdoc2/server/model/repository/KeyShareRepository.class
+ee/cyber/cdoc2/server/model/repository/KeyShareNonceRepository.class
+ee/cyber/cdoc2/server/model/entity/KeyShareDb.class
+ee/cyber/cdoc2/server/model/entity/AuditEntity.class
+ee/cyber/cdoc2/server/model/entity/KeyShareNonceDb.class

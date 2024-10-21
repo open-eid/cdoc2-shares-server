@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>cdoc2-key-shares-server</artifactId>
+	<groupId>ee.cyber.cdoc2</groupId>
+	<version>0.1.0-SNAPSHOT</version>
+
+	<description>CDOC2 server pom</description>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>server-openapi</module>
+		<module>server-common</module>
+		<module>server-db</module>
+		<module>server</module>
+		<module>cdoc2-shared-crypto</module>
+	</modules>
+
+	<properties>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+
+		<!-- by default slow and pcks11 tests are excluded from running-->
+		<!-- ldap test require connection to external esteid.ldap.sk.ee server -->
+		<tests>!(pkcs11 | slow | ldap)</tests>
+
+		<!-- versions of dependencies has to correspond with spring boot version-->
+		<!-- https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html-->
+		<junit-jupiter.version>5.10.3</junit-jupiter.version>
+		<lombok.version>1.18.34</lombok.version>
+		<logback-classic.version>1.5.7</logback-classic.version>
+		<exec-maven-plugin.version>3.4.10</exec-maven-plugin.version>
+		<spring-boot.version>3.3.3</spring-boot.version>
+		<spring.version>6.1.6</spring.version>
+
+  	</properties>
+
+	<profiles>
+		<profile>
+			<id>github_ci_fork</id>
+			<!-- for forks use base maven repo "open-eid/cdoc2-java-ref-impl" -->
+			<activation>
+				<property>
+					<!-- defined by maven.yml for forks only -->
+					<name>env.BASE_REPO</name>
+				</property>
+			</activation>
+			<properties>
+				<github_ci.maven_repo>https://maven.pkg.github.com/${env.BASE_REPO}</github_ci.maven_repo>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>github_ci_not_fork_or_not_pull_request</id>
+			<activation>
+				<property>
+					<!-- set by maven.yml for forks only -->
+					<name>env.IS_FORK</name>
+					<!-- "is_fork" is not defined, or is defined with a value which is not "true". -->
+					<value>!true</value>
+				</property>
+			</activation>
+			<properties>
+				<!--suppress UnresolvedMavenProperty -->
+				<github_ci.maven_repo>https://maven.pkg.github.com/${env.GITHUB_REPOSITORY}</github_ci.maven_repo>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>overwrite "github_ci.maven_repo" from env var "MAVEN_REPO"</id>
+			<activation>
+				<property>
+					<name>env.MAVEN_REPO</name>
+				</property>
+			</activation>
+			<properties>
+				<github_ci.maven_repo>https://maven.pkg.github.com/${env.MAVEN_REPO}</github_ci.maven_repo>
+			</properties>
+		</profile>
+
+
+		<profile>
+			<!-- activate github profile when run by github actions -->
+			<id>github_ci</id>
+			<activation>
+				<property>
+					<name>env.GITHUB_ACTIONS</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- must have matching server.id in settings.xml -->
+					<!-- github actions/checkout default for server-id is "github"-->
+					<id>github</id>
+					<!-- When pulling, the package index is based on the organization level, not the repository level. -->
+					<!-- Although GITHUB_REPOSITORY contains repo, all organization packages are indexed there -->
+					<!-- https://stackoverflow.com/questions/63041402/github-packages-single-maven-repository-for-github-organization -->
+					<!--suppress UnresolvedMavenProperty -->
+					<url>${github_ci.maven_repo}</url>
+				</repository>
+
+			</repositories>
+			<distributionManagement>
+				<repository>
+					<id>github</id>
+					<!--suppress UnresolvedMavenProperty -->
+					<url>https://maven.pkg.github.com/${env.GITHUB_REPOSITORY}</url>
+				</repository>
+				<snapshotRepository>
+					<id>github</id>
+					<!--suppress UnresolvedMavenProperty -->
+					<url>https://maven.pkg.github.com/${env.GITHUB_REPOSITORY}</url>
+				</snapshotRepository>
+			</distributionManagement>
+
+		</profile>
+
+		<profile>
+			<!-- set gitlab.ext profile active when run by gitlab CI -->
+			<id>gitlab_ci</id>
+			<activation>
+				<property>
+					<name>env.GITLAB_CI</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<!-- repositories are configured in settings.xml -->
+			<!--repositories></repositories-->
+
+			<distributionManagement>
+				<!-- env variables are available, when run by gitlab CI -->
+				<repository>
+					<id>${env.CI_SERVER_HOST}</id>
+					<!--suppress UnresolvedMavenProperty -->
+					<url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+				</repository>
+				<snapshotRepository>
+					<id>${env.CI_SERVER_HOST}</id>
+					<!--suppress UnresolvedMavenProperty -->
+					<url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>	</profiles>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<repositories>
+	<!-- configure repositories in settings.xml -->
+	<!--
+	https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry
+	#authenticating-with-a-personal-access-token
+	-->
+	</repositories>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>3.5.0</version>
+
+					<configuration>
+						<configLocation>checkstyle.xml</configLocation>
+						<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+
+						<sourceDirectories>
+							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+						</sourceDirectories>
+
+						<consoleOutput>true</consoleOutput>
+
+						<failsOnError>true</failsOnError>
+						<failOnViolation>false</failOnViolation>
+
+						<linkXRef>false</linkXRef>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+
+					<configuration>
+						<excludes>
+							<exclude>**/*-dev.properties</exclude>
+							<exclude>**/logback.xml</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.5.0</version>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+						<groups>${tests}</groups>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>3.5.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>3.1.1</version>
+					<configuration>
+						<tagNameFormat>v@{project.version}</tagNameFormat>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>validate</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>4.8.6.2</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- if exact RELEASE version of module already exists, -->
+			<!-- then skip deployment by setting maven.deploy.skip=true property for that module -->
+			<!-- GitHub doesn't allow overwriting existing RELEASE modules and deploy will fail with HTTP 409 -->
+			<plugin>
+				<groupId>org.honton.chas</groupId>
+				<artifactId>exists-maven-plugin</artifactId>
+				<version>0.13.0</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>remote</goal>
+						</goals>
+						<configuration>
+							<!-- run only if deploy goal is specified in maven command line -->
+							<requireGoal>deploy</requireGoal>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<failIfNotMatch>false</failIfNotMatch>
+					<userProperty>false</userProperty>
+					<!--skip>true</skip-->
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.1.3</version>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

@@ -1,0 +1,14 @@
+#Mon Oct 21 17:10:35 EEST 2024
+configuration*?=7804488EB81D433B8F5937EA0A512635A3B23B77
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/MonitoringUtil.java=1727864574698
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/SystemTimeInfoContributor.java=1727864574698
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/config/SecurityConfiguration.java=1729514197655
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/test/java/ee/cyber/cdoc2/server/BaseInitializationTest.java=1729514179991
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/test/java/ee/cyber/cdoc2/server/KeyShareIntegrationTest.java=1727866387837
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/GlobalExceptionHandler.java=1729518023153
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/test/java/ee/cyber/cdoc2/server/TestData.java=1729519719726
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/Utils.java=1727864574698
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/config/DbConnectionConfigProperties.java=1727864574698
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/config/ConfigProperties.java=1727864574698
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/RegisteredEndpointsLogger.java=1727864574698
+/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/test/resources/test.properties=1729519833755

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="maven-antrun-" default="main">
+  <target name="main">
+    <echo file="/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/test/resources/test.properties" append="false">cdoc2.keys.dir=/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/../keys</echo>
+  </target>
+</project>
