@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>ee.cyber.cdoc2</groupId>
-        <artifactId>cdoc2-key-shares-server</artifactId>
+        <artifactId>cdoc2-shares-server</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>

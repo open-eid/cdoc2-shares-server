@@ -19,7 +19,7 @@ mvn liquibase:update
 ```
 
 ### Compiling the servers
-From cdoc2-key-shares-server directory run:
+From cdoc2-shares-server directory run:
 ```
 mvn clean package
 ```
@@ -27,9 +27,11 @@ mvn clean package
 ### Running
 (psql in docker must be running)
 
+Two servers instances are needed to be run for sharing the key parts.
 From server directory run:
 ```
-java -Dspring.config.location=config/application-local.properties -jar target/cdoc2-server-VER.jar
+java -Dspring.config.location=config/application-local.properties -jar target/shares-server-VER.jar
+java -Dspring.config.location=config/application-local.properties -jar target/shares-server-VER.jar  --server.port=8442 --management.server.port=18442
 ```
 
 where VER is the version of the package built by mvn package previously.

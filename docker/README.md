@@ -4,17 +4,17 @@
 
 Follow the instructions in [Main README](../README.md#building) to build all Java binaries
 
-## Start CDOC2 Key Capsule Server using Docker Compose
+## Start CDOC2 Key Shares Server using Docker Compose
 
 To install the latest Docker Compose version see https://docs.docker.com/compose/install/
 
-In `cdoc20_java/docker`  directory run
+In `cdoc2-shares-server/docker`  directory run
 ```
 docker compose up
 ```
 
-This will create the database and CDOC2 Key Capsule servers.
-The servers use self-signed test certificates and keystores found in `cdoc_java/cdoc2_server/keys`
+This will create the database and CDOC2 Key Shares servers.
+The servers use self-signed test certificates and keystores found in `cdoc2-shares-server/keys`
 
 For more details on creating server certificates and trust stores, see [Generating Server keystore](../keys/README.md).
 
@@ -22,22 +22,22 @@ For more details on creating server certificates and trust stores, see [Generati
 
 ### Server health check
 
-CDOC2 Key Capsule servers provide a health-check endpoint.
+CDOC2 Key Shares server provide a health-check endpoint.
 To verify that the servers are working properly, execute:
 
 ```
-curl -k https://localhost:18443/actuator/health
+curl -k https://localhost:18442/actuator/health
 ```
 
 and
 
 ```
-curl -k https://localhost:18444/actuator/health
+curl -k https://localhost:18443/actuator/health
 ```
 
-### Encrypt a file using CDOC2 Key Capsule Server
+### Encrypt a file using CDOC2 Key Shares Server
 
-In the `cdoc20_java/cdoc2-cli` folder execute:
+In the `cdoc2-java-ref-impl/cdoc2-cli` repo execute:
 
 ```
 java -jar target/cdoc2-cli-*.jar create \
@@ -49,9 +49,9 @@ java -jar target/cdoc2-cli-*.jar create \
 
 Replace `EST_ID_CODE` with the Estonian identification code of the recipient.
 
-### Decrypt a file using CDOC2 Key Capsule Server
+### Decrypt a file using CDOC2 Key Shares Server
 
-In the `cdoc20_java/cdoc2-cli` folder execute:
+In the `cdoc2-java-ref-impl/cdoc2-cli` repo execute:
 
 ```
 java -jar target/cdoc2-cli*.jar decrypt \

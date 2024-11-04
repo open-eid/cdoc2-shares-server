@@ -10,7 +10,6 @@ and [DigiDoc4-Client](https://github.com/open-eid/DigiDoc4-Client) for CDOC2 enc
 
   - server              - Implements `/key-shares` API-s. 
   - server-db           - shared DB code. Liquibase based DB creation
-  - server-common       - shared common server code
   - server-openapi      - server stub generation from OpenAPI specifications
   - cdoc2-shared-crypto - some shared crypto functions
 
@@ -52,7 +51,7 @@ So defining single Maven package repo from `open-eid` is enough for pulling cdoc
 
 ## Building & Running
 
-[![Build cdoc2-key-shares-server with CI](https://github.com/open-eid/cdoc2-key-shares-server/actions/workflows/maven.yml/badge.svg)](https://github.com/open-eid/cdoc2-key-shares-server/actions/workflows/maven.yml)
+[![Build cdoc2-shares-server with CI](https://github.com/open-eid/cdoc2-shares-server/actions/workflows/maven.yml/badge.svg)](https://github.com/open-eid/cdoc2-shares-server/actions/workflows/maven.yml)
 
 ```bash
 mvn clean install
@@ -74,7 +73,7 @@ See [getting-started.md](getting-started.md) and [admin-guide.md](admin-guide.md
 
 ### Running pre-built Docker/OCI images
 
-Download `cdoc2-key-shares-server` image from [open-eid Container registry](https://github.com/orgs/open-eid/packages?ecosystem=container)
+Download `cdoc2-shares-server` image from [open-eid Container registry](https://github.com/orgs/open-eid/packages?ecosystem=container)
 
 * See [cdoc2-gatling-tests/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/tree/master/setup-load-testing) for `docker run` examples 
 * See [cdoc2-java-ref-impl/test/config/server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/test/config/server/docker-compose.yml) for `docker compose` example
@@ -94,4 +93,4 @@ and build & publish Docker/OCI images.
 
 ## Related projects
 
-* Gatling tests (load and functional) for cdoc2-key-shares-server https://github.com/open-eid/cdoc2-gatling-tests 
+* Gatling tests (load and functional) for cdoc2-shares-server https://github.com/open-eid/cdoc2-gatling-tests 
