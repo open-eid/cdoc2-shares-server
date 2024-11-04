@@ -10,7 +10,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: cdoc2-server-liquibase
-  #IMAGE_NAME: ${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/cdoc2-server:${TAG}-${GITHUB_SHA}
+  #IMAGE_NAME: ${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/shares-server:${TAG}-${GITHUB_SHA}
 
 # There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
 jobs:

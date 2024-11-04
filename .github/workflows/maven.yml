@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build cdoc2-key-shares-server with CI
+name: Build cdoc2-shares-server with CI
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
           IS_FORK: ${{needs.fork_setup.outputs.is_fork}}
           BASE_REPO: ${{needs.fork_setup.outputs.base_repo}}
-          MAVEN_REPO: ${{vars.MAVEN_REPO}} # set as repository variable: open-eid/cdoc2-key-shares-server
+          MAVEN_REPO: ${{vars.MAVEN_REPO}} # set as repository variable: open-eid/cdoc2-shares-server
 
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive

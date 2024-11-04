@@ -1,8 +1,0 @@
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/GlobalExceptionHandler.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/MonitoringUtil.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/RegisteredEndpointsLogger.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/SystemTimeInfoContributor.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/Utils.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/config/ConfigProperties.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/config/DbConnectionConfigProperties.java
-/home/osmirnov/CDOC2/src/cdoc2-key-shares-server/server-common/src/main/java/ee/cyber/cdoc2/server/config/SecurityConfiguration.java

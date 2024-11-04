@@ -52,7 +52,7 @@ For more details about operations with certificates in keystore files, see [^1].
 
 #### Requirements
 - Java runtime (at least JDK 17)
-- the application binary `cdoc2-server-<VERSION>.jar`
+- the application binary `shares-server-<VERSION>.jar`
 - the configuration file `application.properties`
 
 #### Configuration
@@ -98,7 +98,7 @@ logging.level.ee.cyber.cdoc2=trace
 To run the server, execute the following command:
 
 `
-java -jar -Dspring.config.location=application.properties cdoc2-server-VER.jar
+java -jar -Dspring.config.location=application.properties shares-server-VER.jar
 `
 
 #### Running in Docker
@@ -189,8 +189,8 @@ Only `/prometheus` endpoint is authenticated.
 ```json
 {
   "build": {
-    "artifact": "cdoc2-server",
-    "name": "cdoc2-server",
+    "artifact": "shares-server",
+    "name": "shares-server",
     "time": "2023-01-17T14:31:18.918Z",
     "version": "0.1.0-SNAPSHOT",
     "group": "ee.cyber.cdoc2"
@@ -248,13 +248,13 @@ Only `/prometheus` endpoint is authenticated.
 ```
 # HELP executor_pool_core_threads The core number of threads for the pool
 # TYPE executor_pool_core_threads gauge
-executor_pool_core_threads{application="cdoc2-server",applications="transfer-service",name="applicationTaskExecutor",} 8.0
+executor_pool_core_threads{application="shares-server",applications="transfer-service",name="applicationTaskExecutor",} 8.0
 # HELP jvm_memory_usage_after_gc_percent The percentage of long-lived heap pool used after the last GC event, in the range [0..1]
 # TYPE jvm_memory_usage_after_gc_percent gauge
-jvm_memory_usage_after_gc_percent{application="cdoc2-server",applications="transfer-service",area="heap",pool="long-lived",} 0.00239985994123664
+jvm_memory_usage_after_gc_percent{application="shares-server",applications="transfer-service",area="heap",pool="long-lived",} 0.00239985994123664
 # HELP jvm_memory_used_bytes The amount of used memory
 # TYPE jvm_memory_used_bytes gauge
-jvm_memory_used_bytes{application="cdoc2-server",applications="transfer-service",area="nonheap",id="Compressed Class Space",} 1.0815688E7
+jvm_memory_used_bytes{application="shares-server",applications="transfer-service",area="nonheap",id="Compressed Class Space",} 1.0815688E7
 ...........
 # HELP jdbc_connections_active Current number of active connections that have been allocated from the data source.
 # TYPE jdbc_connections_active gauge

@@ -23,13 +23,13 @@ services:
       - ../server-db/src/main/resources/db/liquibase.properties.docker:/liquibase/changelog/liquibase.properties
     command: liquibase --url="jdbc:postgresql://cdoc2-postgres:5432/postgres?user=postgres&password=postgres" --defaults-file=/liquibase/changelog/liquibase.properties update
 
-  cdoc2-key-shares-server:
-    container_name: cdoc2-key-shares-server
+  shares-server:
+    container_name: shares-server
     build:
       context: ../
       dockerfile: server/docker/Dockerfile
       args:
-        NAME: cdoc2-key-shares-server
+        NAME: shares-server
     ports:
       - "8443:8443"
       # monitoring

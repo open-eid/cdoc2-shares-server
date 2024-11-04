@@ -1,8 +1,0 @@
-ee/cyber/cdoc2/server/Utils.class
-ee/cyber/cdoc2/server/RegisteredEndpointsLogger.class
-ee/cyber/cdoc2/server/config/SecurityConfiguration.class
-ee/cyber/cdoc2/server/config/ConfigProperties.class
-ee/cyber/cdoc2/server/config/DbConnectionConfigProperties.class
-ee/cyber/cdoc2/server/GlobalExceptionHandler.class
-ee/cyber/cdoc2/server/SystemTimeInfoContributor.class
-ee/cyber/cdoc2/server/MonitoringUtil.class
