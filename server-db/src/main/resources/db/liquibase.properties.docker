@@ -1,2 +1,2 @@
-classpath: /liquibase/changelog
+classpath: /liquibase/cdoc2
 changelog-file: db.changelog-master.yaml
