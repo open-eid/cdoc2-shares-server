@@ -4,9 +4,10 @@ variables:
 
 .publish-component: &publish-component
   stage: publish
-  image:
-    name: gcr.io/kaniko-project/executor:v1.22.0-debug
-    entrypoint: [""]
+  image: maven:3.8.8-eclipse-temurin-17
+  services:
+    - name: docker:25.0.3-dind
+      alias: docker
   tags:
     - dind
   rules:
@@ -16,27 +17,19 @@ variables:
       when: on_success
     - when: never
   script:
-    - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-      /kaniko/executor \
-        --context $CI_PROJECT_DIR \
-        --build-arg NAME=${COMPONENT} \
-        --build-arg http_proxy=$http_proxy \
-        --build-arg https_proxy=$https_proxy \
-        --dockerfile $CI_PROJECT_DIR/${COMPONENT}/docker/Dockerfile \
-        --destination $DOCKER_IMAGE_NAME:latest \
-        --destination $DOCKER_IMAGE_NAME:$CI_COMMIT_REF_SLUG \
-        --cache
-      else
-      /kaniko/executor \
-        --context $CI_PROJECT_DIR \
-        --build-arg NAME=${COMPONENT} \
-        --build-arg http_proxy=$http_proxy \
-        --build-arg https_proxy=$https_proxy \
-        --dockerfile $CI_PROJECT_DIR/${COMPONENT}/docker/Dockerfile \
-        --destination $DOCKER_IMAGE_NAME:$CI_COMMIT_REF_SLUG \
-        --cache
-      fi
+    - source load-env.sh
+    - cd shares-server
+    - >
+      mvn -s $MAVEN_SETTINGS spring-boot:build-image
+      -Dspring-boot.build-image.publish=true 
+      -Dspring-boot.build-image.imageName=${DOCKER_REGISTRY}cdoc2-shares-server/shares-server:${SHARES_SERVER_VERSION} 
+      -Dspring-boot.build-image.createdDate=now 
+      -Dmaven.test.skip=true
+      -Dhttp.proxy=$BUILD_HTTP_PROXY
+      -Dhttps.proxy=$BUILD_HTTPS_PROXY
+      -Ddocker.publishRegistry.url=${DOCKER_REGISTRY}
+      -Ddocker.publishRegistry.username=${CI_REGISTRY_USER}
+      -Ddocker.publishRegistry.password=${CI_REGISTRY_PASSWORD}
 
 stages:
   - test
@@ -69,46 +62,13 @@ test:
     reports:
       junit:
         - "**/target/surefire-reports/*.xml"
-    paths:
-      - "**/target/site/jacoco"
+      coverage_report:
+        coverage_format: jacoco
+        path: "**/target/site/jacoco/jacoco.xml"
   cache: 
     key: "$CI_COMMIT_REF_NAME"
     paths:
       - .m2/repository
-
-coverage:
-  stage: coverage
-  image: mcr.microsoft.com/dotnet/sdk:8.0
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: on_success
-    - when: never
-  script:
-    - export PATH="$PATH:/root/.dotnet/tools"
-    - dotnet tool restore
-    - dotnet tool install dotnet-reportgenerator-globaltool --global
-    - |
-      for src in $(find /builds -type f -name 'jacoco.xml' | sed -r 's|/target/site/jacoco/[^/]+$||' |  sort -u )
-      do
-        sourcedirs="$src/src/main/java/"
-        for i in $(find $src -type f -name '*.java' | sed -r 's|/[^/]+$||' |sort -u)
-        do
-          sourcedirs="${sourcedirs};${i}"
-        done
-        reportgenerator \
-        -reports:$src/**/jacoco.xml \
-        -targetdir:$src/target/reports \
-        -reporttypes:Cobertura \
-        -sourcedirs:$sourcedirs
-        sed -i 's|filename=\"'"$src"'/src/main/java/|filename=\"|g' $src/target/reports/Cobertura.xml
-      done
-  artifacts:
-    paths:
-      - "$CI_PROJECT_DIR/**/Cobertura.xml"
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: "$CI_PROJECT_DIR/**/Cobertura.xml"
 
 build-components:
   stage: build
