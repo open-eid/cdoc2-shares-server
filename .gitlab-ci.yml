@@ -147,7 +147,7 @@ publish:maven:
 
 publish:server:
   variables:
-    COMPONENT: server
+    COMPONENT: shares-server
     DOCKER_IMAGE_NAME: $DOCKER_REGISTRY/${COMPONENT}
   extends:
     - .publish-component
