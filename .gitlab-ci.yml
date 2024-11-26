@@ -1,0 +1,113 @@
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://docker:2375"
+
+.publish-component: &publish-component
+  stage: publish
+  image: maven:3.8.8-eclipse-temurin-17
+  services:
+    - name: docker:25.0.3-dind
+      alias: docker
+  tags:
+    - dind
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: on_success
+    - when: never
+  script:
+    - source load-env.sh
+    - cd shares-server
+    - >
+      mvn -s $MAVEN_SETTINGS spring-boot:build-image
+      -Dspring-boot.build-image.publish=true 
+      -Dspring-boot.build-image.imageName=${DOCKER_REGISTRY}cdoc2-shares-server/shares-server:${SHARES_SERVER_VERSION} 
+      -Dspring-boot.build-image.createdDate=now 
+      -Dmaven.test.skip=true
+      -Dhttp.proxy=$BUILD_HTTP_PROXY
+      -Dhttps.proxy=$BUILD_HTTPS_PROXY
+      -Ddocker.publishRegistry.url=${DOCKER_REGISTRY}
+      -Ddocker.publishRegistry.username=${CI_REGISTRY_USER}
+      -Ddocker.publishRegistry.password=${CI_REGISTRY_PASSWORD}
+
+stages:
+  - test
+  - coverage
+  - build
+  - publish
+
+test:
+  stage: test
+  image: maven:3.8.8-eclipse-temurin-17
+  services:
+    - name: docker:25.0.3-dind
+      alias: docker
+  tags:
+    - dind
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
+  script:
+    - cat $MAVEN_SETTINGS
+    - mvn clean verify -s $MAVEN_SETTINGS -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    - shopt -s globstar
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print "Total", 100*covered/instructions, "% covered" }' /builds/**/target/site/jacoco/jacoco.csv
+  coverage: /Total \d+\.\d+ %/
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - "**/target/surefire-reports/*.xml"
+      coverage_report:
+        coverage_format: jacoco
+        path: "**/target/site/jacoco/jacoco.xml"
+  cache: 
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .m2/repository
+
+build-components:
+  stage: build
+  image: maven:3.8.8-eclipse-temurin-17
+  script:
+    - mvn clean install -s $MAVEN_SETTINGS -DskipTests -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+  cache: 
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .m2/repository
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
+  artifacts:
+    paths:
+      - ./**/target/*.jar
+
+publish:maven: 
+  stage: publish
+  image: maven:3.8.8-eclipse-temurin-17
+  script:
+    - cat $MAVEN_SETTINGS
+    - mvn clean deploy -s $MAVEN_SETTINGS -DskipTests -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+  cache: 
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - .m2/repository
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - if: '$CI_COMMIT_TAG =~ /^.*deploy.*$/'
+    - when: never
+
+publish:server:
+  variables:
+    COMPONENT: shares-server
+    DOCKER_IMAGE_NAME: $DOCKER_REGISTRY/${COMPONENT}
+  extends:
+    - .publish-component
