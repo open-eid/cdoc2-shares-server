@@ -468,6 +468,8 @@
 							<!--suppress UnresolvedMavenProperty -->
 							<BP_DEPENDENCY_MIRROR>${bp.dependency.mirror}</BP_DEPENDENCY_MIRROR>
 							<BPL_SPRING_CLOUD_BINDINGS_DISABLED>true</BPL_SPRING_CLOUD_BINDINGS_DISABLED>
+							<HTTP_PROXY>${http.proxy}</HTTP_PROXY>
+							<HTTPS_PROXY>${https.proxy}</HTTPS_PROXY>
 						</env>
 						<!--suppress UnresolvedMavenProperty -->
 						<tags>${spring-boot.build-image.tags}</tags>
