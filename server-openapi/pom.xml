@@ -6,14 +6,14 @@
 
     <parent>
         <groupId>ee.cyber.cdoc2</groupId>
-        <artifactId>cdoc2-shares-server</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <artifactId>cdoc2-shares-server-pom</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>cdoc2-server-openapi</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
-    <description>CDOC2 server stub generation from OpenAPI spec</description>
+    <artifactId>cdoc2-css-openapi</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+    <description>CDOC2 shares server stub generation from OpenAPI spec</description>
 
     <properties>
         <java.version>17</java.version>
@@ -28,7 +28,7 @@
         <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
 
         <!--info.version from cdoc2-openapi/cdoc2-key-shares-openapi.yaml -->
-        <cdoc2-key-shares-openapi.version>1.0.0-draft</cdoc2-key-shares-openapi.version>
+        <cdoc2-key-shares-openapi.version>1.0.1-draft</cdoc2-key-shares-openapi.version>
 
     </properties>
 

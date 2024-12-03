@@ -4,14 +4,14 @@ CDOC2 Key Shares Server for [CDOC2](https://open-eid.github.io/CDOC2/).
 
 Implements `cdoc2-key-shares-openapi` [OpenAPI spec](https://github.com/open-eid/cdoc2-openapi/blob/master/cdoc2-key-shares-openapi.yaml) from [cdoc2-openapi](https://github.com/open-eid/cdoc2-openapi/)
 for Key Shares upload/download. Used by [cdoc2-java-ref-impl](https://github.com/open-eid/cdoc2-java-ref-impl) 
-and [DigiDoc4-Client](https://github.com/open-eid/DigiDoc4-Client) for CDOC2 encryption/decryption server scenarios.
+and [DigiDoc4-Client](https://github.com/open-eid/DigiDoc4-Client) for CDOC2 encryption/decryption Smart-ID/Mobile-ID scenarios.
 
 ## Structure
 
   - server              - Implements `/key-shares` API-s. 
   - server-db           - shared DB code. Liquibase based DB creation
   - server-openapi      - server stub generation from OpenAPI specifications
-  - cdoc2-shared-crypto - some shared crypto functions
+
 
 ## Preconditions for building
 * Java 17
@@ -73,12 +73,7 @@ See [getting-started.md](getting-started.md) and [admin-guide.md](admin-guide.md
 
 ### Running pre-built Docker/OCI images
 
-Download `cdoc2-shares-server` image from [open-eid Container registry](https://github.com/orgs/open-eid/packages?ecosystem=container)
-
-* See [cdoc2-gatling-tests/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/tree/master/setup-load-testing) for `docker run` examples 
-* See [cdoc2-java-ref-impl/test/config/server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/test/config/server/docker-compose.yml) for `docker compose` example
-
-To create `cdoc2` database required by `server` see [postgres.README.md](postgres.README.md)
+TODO:
 
 ## Releasing and versioning
 
@@ -90,7 +85,3 @@ See [VERSIONING.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/
 It will trigger `maven-release.yml` workflow that will deploy Maven packages to GitHub Maven package repository
 and build & publish Docker/OCI images.
 
-
-## Related projects
-
-* Gatling tests (load and functional) for cdoc2-shares-server https://github.com/open-eid/cdoc2-gatling-tests 

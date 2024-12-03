@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import ee.cyber.cdoc2.shared.crypto.Crypto;
+import ee.cyber.cdoc2.server.model.Crypto;
 
 
 /**

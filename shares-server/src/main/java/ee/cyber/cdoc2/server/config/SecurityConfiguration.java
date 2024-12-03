@@ -34,7 +34,6 @@ public class SecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize ->
                 authorize
-                    .requestMatchers(new AntPathRequestMatcher("/key-shares**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/key-shares/**")).permitAll()
                     // authenticated URI must go first
                     .requestMatchers(new AntPathRequestMatcher("/actuator/prometheus")).authenticated()

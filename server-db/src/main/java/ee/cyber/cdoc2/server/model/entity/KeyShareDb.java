@@ -19,7 +19,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import ee.cyber.cdoc2.shared.crypto.Crypto;
+import ee.cyber.cdoc2.server.model.Crypto;
 
 
 /**

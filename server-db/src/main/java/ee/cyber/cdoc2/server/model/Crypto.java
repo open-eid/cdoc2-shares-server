@@ -1,4 +1,4 @@
-package ee.cyber.cdoc2.shared.crypto;
+package ee.cyber.cdoc2.server.model;
 
 import java.security.DrbgParameters;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +26,8 @@ public final class Crypto {
 
     private static SecureRandom createSecureRandom() throws NoSuchAlgorithmException {
         log.debug("Initializing SecureRandom");
-        SecureRandom sRnd = SecureRandom.getInstance("DRBG", DrbgParameters.instantiation(256, DrbgParameters.Capability.PR_AND_RESEED, "CDOC2".getBytes()));
+        SecureRandom sRnd = SecureRandom.getInstance("DRBG",
+            DrbgParameters.instantiation(256, DrbgParameters.Capability.PR_AND_RESEED, "CDOC2".getBytes()));
         log.info("Initialized SecureRandom.");
         return sRnd;
     }
