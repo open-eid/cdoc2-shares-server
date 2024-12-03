@@ -30,8 +30,8 @@
     <logger name="org.hibernate" level="OFF" />
     <logger name="org.springframework" level="OFF"/>
 
-    <!-- LOG everything at INFO level -->
-    <root level="info">
+    <!-- LOG everything at WARN level -->
+    <root level="WARN">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </root>

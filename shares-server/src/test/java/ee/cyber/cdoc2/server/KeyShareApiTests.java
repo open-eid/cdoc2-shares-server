@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @Slf4j
-public class KeyShareApiTests extends KeyShareIntegrationTest {
+class KeyShareApiTests extends KeyShareIntegrationTest {
 
     private static final byte[] SHARE = new byte[128];
     private static final String SHARE_RECIPIENT = "Recipient_for_key_share";
@@ -42,11 +42,13 @@ public class KeyShareApiTests extends KeyShareIntegrationTest {
     @Test
     void shouldGetKeyShare() throws Exception {
         KeyShare keyShare = createKeyShare();
+        keyShare.setRecipient(TestData.TEST_ETSI_RECIPIENT);
 
         String shareId = this.saveKeyShare(keyShare).getShareId();
-        byte[] xAuthTicket = new byte[32];
+        String nonce = client.createNonce(shareId).getNonce();
+        String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
 
-        Optional<KeyShare> response = client.getKeyShare(shareId, xAuthTicket);
+        Optional<KeyShare> response = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM);
 
         assertTrue(response.isPresent());
         KeyShare savedKeyShare = response.get();
@@ -57,11 +59,12 @@ public class KeyShareApiTests extends KeyShareIntegrationTest {
     @Test
     void shouldFailToGetKeyShareWithBadRequest() {
         String shareId = "short";
-        byte[] xAuthTicket = new byte[32];
+        String xAuthTicket = "";
+        String xAuthCert = "";
 
         ApiException ex = assertThrows(
             ApiException.class,
-            () -> client.getKeyShare(shareId, xAuthTicket)
+            () -> client.getKeyShare(shareId, xAuthTicket, xAuthCert)
         );
 
         assertBadRequest(ex.getCode());
@@ -70,9 +73,11 @@ public class KeyShareApiTests extends KeyShareIntegrationTest {
     @Test
     void shouldFailToGetKeyShareWithNotFound() throws ApiException {
         String shareId = "SHARE_ID_MIN_LENGTH_SHOULD_BE_32";
-        byte[] xAuthTicket = new byte[32];
 
-        Optional<KeyShare> keyShare = client.getKeyShare(shareId, xAuthTicket);
+        String nonce = "random";
+        String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
+
+        Optional<KeyShare> keyShare = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM);
 
         assertTrue(keyShare.isEmpty());
     }

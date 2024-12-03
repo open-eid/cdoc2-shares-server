@@ -91,6 +91,14 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 # change to 'debug' if you want to see logs. Run server with -Dlogging.config=target/test-classes/logback.xml
 logging.level.root=info
 logging.level.ee.cyber.cdoc2=trace
+
+# Enable/disable certificate revocation checking for auth ticket certificates, 
+# experimental feature, default value is "false"
+cdoc2.auth-x5c.revocation-checks.enabled=false
+
+# nonce validity time in seconds, default 300
+cdoc2.nonce.expiration.seconds=300
+
 ```
 
 #### Running

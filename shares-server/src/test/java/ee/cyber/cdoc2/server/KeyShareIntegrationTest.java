@@ -2,6 +2,7 @@ package ee.cyber.cdoc2.server;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HexFormat;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -78,6 +80,17 @@ abstract class KeyShareIntegrationTest extends BaseInitializationTest {
         assertEquals(shareId, dbNonceRecord.getShareId());
         assertNotNull(dbNonceRecord.getNonce());
         log.debug("Retrieved {}", dbNonceRecord);
+
+        // check findByShareIdAndNonce
+        Optional<KeyShareNonceDb> retrievedOpt = this.shareNonceRepository.findByShareIdAndNonce(shareId,
+            dbNonceRecord.getNonce());
+
+        assertTrue(retrievedOpt.isPresent());
+        String nonceHex = HexFormat.of().formatHex(dbNonceRecord.getNonce());
+        KeyShareNonceDb retrievedNonce =  retrievedOpt.get();
+        log.debug("findByShareIdAndNonce({},{}): {}", shareId, nonceHex, retrievedNonce);
+        assertEquals(shareId, retrievedNonce.getShareId());
+        assertArrayEquals(dbNonceRecord.getNonce(), retrievedNonce.getNonce());
     }
 
 }
