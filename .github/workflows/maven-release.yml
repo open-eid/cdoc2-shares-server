@@ -56,8 +56,8 @@ jobs:
             -Ddocker.publishRegistry.url=${REGISTRY} \
             -Ddocker.publishRegistry.username=${USERNAME} \
             -Ddocker.publishRegistry.password=${GITHUB_TOKEN} \
-            -Dspring-boot.build-image.imageName=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/shares-server:${TAG}-${GITHUB_SHA} \
-            -Dspring-boot.build-image.tags=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/shares-server:latest
+            -Dspring-boot.build-image.imageName=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/cdoc2-shares-server:${TAG}-${GITHUB_SHA} \
+            -Dspring-boot.build-image.tags=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/cdoc2-shares-server:latest
         env:
           REGISTRY: ghcr.io
           USERNAME: ${{ github.actor }}
