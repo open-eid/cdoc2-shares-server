@@ -5,4 +5,10 @@ FROM $LIQUIBASE_IMAGE
 USER liquibase
 WORKDIR /liquibase/changelog
 
-CMD liquibase --url=jdbc:postgresql://cdoc2-shares-postgres:5432/$DB_URL --username=$DB_USER --password=${DB_PASSWORD} update
+COPY changelog/db.changelog-master.yaml ./
+# create dir structure as specified in changelog file above
+COPY changelog/changes ./db/changelog/changes
+
+COPY liquibase.properties.docker ./liquibase.properties
+
+CMD ["sh", "-c", "liquibase --url=$DB_URL --username=${DB_USER} --password=${DB_PASSWORD} update"]

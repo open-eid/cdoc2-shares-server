@@ -1,3 +1,4 @@
+# Not up to date, see https://github.com/open-eid/cdoc2-java-ref-impl/test/README.md for working docker example
 services:
   cdoc2-shares-postgres:
     container_name: cdoc2-shares-postgres

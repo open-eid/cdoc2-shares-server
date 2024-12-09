@@ -1,3 +1,4 @@
+# Not up to date, see https://github.com/open-eid/cdoc2-java-ref-impl/test/README.md for working docker example
 services:
   cdoc2-shares-postgres:
     container_name: cdoc2-shares-postgres
@@ -49,6 +50,8 @@ services:
         target: /config/servertruststore.jks
       - source: keystore
         target: /config/cdoc2server.p12
+      - source: sid-trusted-issuers-truststore
+        target: /config/sid_trusted_issuers.jks
     environment:
       - SPRING_CONFIG_ADDITIONAL_LOCATION=optional:file:/config/application.properties
       - POSTGRES_URL=${POSTGRES_URL}
@@ -79,6 +82,8 @@ services:
         target: /config/servertruststore.jks
       - source: keystore
         target: /config/cdoc2server.p12
+      - source: sid-trusted-issuers-truststore
+        target: /config/sid_trusted_issuers.jks
     environment:
       - SPRING_CONFIG_ADDITIONAL_LOCATION=optional:file:/config/application.properties
       - POSTGRES_URL=${POSTGRES_URL}
@@ -99,3 +104,5 @@ configs:
     file: ./keys/servertruststore.jks
   keystore:
     file: ./keys/cdoc2server.p12
+  sid-trusted-issuers-truststore:
+      file: ./shares-server/test/resources/sid-trusted-issuers/test_sid_trusted_issuers.jks

@@ -1,10 +1,10 @@
 ## Create postgres instance inside docker
 
 ```
-docker run --name cdoc2-psql -p 5432:5432 -e POSTGRES_DB=cdoc2-shares -e POSTGRES_PASSWORD=secret -d postgres
+docker run --name cdoc2-shares-psql -p 5432:5432 -e POSTGRES_DB=cdoc2-shares -e POSTGRES_PASSWORD=secret -d postgres
 
-docker start cdoc2-psql
-docker stop cdoc2-psql
+docker start cdoc2-shares-psql
+docker stop cdoc2-shares-psql
 ```
 #docker rm cdoc2-psql
 
@@ -16,18 +16,18 @@ image (version must match server version) that contains liquibase changeset file
 server version and create a `cdoc2-shares` database. If database is running inside Docker, 
 then `--link` is required, so that liquibase container can connect to it.
 ```
-docker run --rm --link cdoc2-psql \
+docker run --rm --link cdoc2-shares-psql \
   --env DB_URL=jdbc:postgresql://cdoc2-psql/cdoc2-shares \
   --env DB_PASSWORD=secret \
   --env DB_USER=postgres \
-  ghcr.io/open-eid/cdoc2-server-liquibase:v1.4.1-rc.1-74cbc827e3cf08c2f4a51711a2072b6344f9aee1
+  ghcr.io/open-eid/cdoc2-shares-server-liquibase:latest
 ```
 
 or use standard liquibase command:
 
 ```
-docker run --rm --link cdoc2-psql \
-ghcr.io/open-eid/cdoc2-server-liquibase:v1.4.1-rc.1-74cbc827e3cf08c2f4a51711a2072b6344f9aee1 \
+docker run --rm --link cdoc2-shares-psql \
+ghcr.io/open-eid/cdoc2-shares-server-liquibase:latest \
   --url jdbc:postgresql://cdoc2-psql/cdoc2-shares \
   --username=postgres \
   --password=secret \
@@ -39,7 +39,3 @@ Can also be used to update DB running in other host by changing `--url`, `--user
 Then `--link` is not required.
 
 More info https://hub.docker.com/r/liquibase/liquibase
-
-## Or use docker-compose.yml
-
-Follow the instruction in `docker/README.md`.
