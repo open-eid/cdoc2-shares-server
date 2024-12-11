@@ -73,7 +73,7 @@ See [getting-started.md](getting-started.md) and [admin-guide.md](admin-guide.md
 
 ### Running pre-built Docker/OCI images
 
-TODO:
+See [cdoc2-java-ref-impl](https://github.com/open-eid/cdoc2-java-ref-impl)/test/config/shares-server/docker-compose.yml
 
 ## Releasing and versioning
 

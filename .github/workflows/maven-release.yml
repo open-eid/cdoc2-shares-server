@@ -1,7 +1,7 @@
 # This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
 
-name: Publish to cdoc2-shares-server GitHub Packages Apache Maven (Maven repository)
+name: Publish to cdoc2-shares-server GitHub Packages (Maven and Container)
 
 on:
   release:
@@ -28,9 +28,9 @@ jobs:
 # Here: deploy for each submodule is necessary
 # to deploy submodules even when main module didn't change
       - name: Publish to GitHub Packages Apache Maven
+        if: true
         run: |
-          mvn deploy -s $GITHUB_WORKSPACE/settings.xml
-          mvn -f shared-crypto deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml
+          mvn deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml 
           mvn -f server-openapi deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml
           mvn -f server-db deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml
           mvn -f shares-server deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml
@@ -55,9 +55,8 @@ jobs:
             -Ddocker.publishRegistry.url=${REGISTRY} \
             -Ddocker.publishRegistry.username=${USERNAME} \
             -Ddocker.publishRegistry.password=${GITHUB_TOKEN} \
-            -Dspring-boot.build-image
-          .imageName=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/shares-server:${TAG}-${GITHUB_SHA} \
-            -Dspring-boot.build-image.tags=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/shares-server:latest
+            -Dspring-boot.build-image.imageName=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/cdoc2-shares-server:${TAG}-${GITHUB_SHA} \
+            -Dspring-boot.build-image.tags=${REGISTRY}/${GITHUB_REPOSITORY_OWNER}/cdoc2-shares-server:latest
         env:
           REGISTRY: ghcr.io
           USERNAME: ${{ github.actor }}
@@ -68,5 +67,3 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
           # use open-eid Maven repo for dependencies download, see pom.xml
           MAVEN_REPO: open-eid/cdoc2-shares-server
-
-
