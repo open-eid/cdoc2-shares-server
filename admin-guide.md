@@ -99,6 +99,8 @@ cdoc2.auth-x5c.revocation-checks.enabled=false
 # nonce validity time in seconds, default 300
 cdoc2.nonce.expiration.seconds=300
 
+# Expired share nonce removing job executes every 5 minutes every day
+key-share-nonce.expired.clean-up.cron=0 0/5 * * * ?
 ```
 
 #### Running

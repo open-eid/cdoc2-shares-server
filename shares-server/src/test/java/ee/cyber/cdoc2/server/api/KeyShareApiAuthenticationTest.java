@@ -1,27 +1,23 @@
 package ee.cyber.cdoc2.server.api;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.nimbusds.jose.util.X509CertUtils;
 import ee.cyber.cdoc2.auth.VerificationException;
+import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import org.springframework.web.context.request.NativeWebRequest;
 
 import java.security.cert.X509Certificate;
@@ -36,16 +32,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-@EnableAutoConfiguration(exclude = { //disable DB related beans, as these will fail to start without DB
-    JpaRepositoriesAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class,
-    DataSourceAutoConfiguration.class})
-@MockBean(JpaMetamodelMappingContext.class) // although not using JPA, Spring fails to start without 'jpaMappingContext'
-                                            // bean for some reason. Define @MockBean
-//@ExtendWith(MockitoExtension.class) // MockitoExtension doesn't work with SpringExtension in the same class
-class KeyShareApiAuthenticationTest {
+
+@ExtendWith(MockitoExtension.class)
+class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
 
     private static final byte[] SHARE = new byte[128];
     private static final String SID_DEMO_IDENTIFIER = "30303039914";
@@ -53,25 +42,22 @@ class KeyShareApiAuthenticationTest {
     private static final String SHARE_ID = "ff0102030405060708090a0b0c0e0dff";
     private static final byte[] NONCE_BYTES = HexFormat.of().parseHex("000102030405060708090a0b0c0e0dff");
 
-    @MockBean
+    @Mock
     private KeyShareRepository mockShareRep;
 
-    @MockBean
+    @Mock
     private KeyShareNonceRepository mockNonceRep;
 
-    //@Mock
-    // since not using MockitoExtension, need to be mocked manually
+    @Mock
     private NativeWebRequest mockNativeWebRequest;
 
-    //@Mock
-    // since not using MockitoExtension, need to be mocked manually
-    HttpServletRequest mockHttpServletRequest;
+    @Mock
+    private HttpServletRequest mockHttpServletRequest;
 
     @Autowired
     private SslBundles sslBundles; // initialized from application.properties
 
-    // initialized in setUp as non-MockBeans parameters must be mocked manually
-    KeyShareApiService keyShareApiService;
+    private KeyShareApiService keyShareApiService;
 
     // pre-generated using cdoc2-java-ref-impl AuthTokenCreatorTest::testCreateAuthToken test
     // generated with SID demo env
@@ -142,15 +128,13 @@ class KeyShareApiAuthenticationTest {
 
     @BeforeEach
     public void setUp() {
-        // Code to be executed before each test method in this class
-        mockNativeWebRequest = Mockito.mock(NativeWebRequest.class);
-        mockHttpServletRequest = Mockito.mock(HttpServletRequest.class);
-        keyShareApiService = new KeyShareApiService(mockNativeWebRequest, mockShareRep, mockNonceRep, sslBundles);
+        keyShareApiService = new KeyShareApiService(
+            mockNativeWebRequest, mockShareRep, mockNonceRep, sslBundles
+        );
     }
 
     @Test
     void shouldAuthenticateAndGetKeyShare() {
-
         KeyShareDb keyShareDb = new KeyShareDb()
                 .setShareId(SHARE_ID)
                 .setShare(SHARE)
@@ -167,9 +151,8 @@ class KeyShareApiAuthenticationTest {
         when(mockHttpServletRequest.getHeader("X-Forwarded-Host")).thenReturn("localhost");
         when(mockHttpServletRequest.getHeader("X-Forwarded-Port")).thenReturn("8443");
         when(mockHttpServletRequest.getRequestURI()).thenReturn("/key-shares/" + SHARE_ID);
-        when(mockHttpServletRequest.getQueryString()).thenReturn(null);
 
-        when(mockShareRep.findById(eq(SHARE_ID))).thenReturn(Optional.of(keyShareDb));
+        when(mockShareRep.findById(SHARE_ID)).thenReturn(Optional.of(keyShareDb));
         when(mockNonceRep.findByShareIdAndNonce(eq(SHARE_ID), any())).thenReturn(Optional.of(nonceDb));
 
         String pemCertNoLineBreaks = X509CertUtils.toPEMString(X509CertUtils.parse(sidCertStr), false);
@@ -183,7 +166,6 @@ class KeyShareApiAuthenticationTest {
 
     @Test
     void testCheckCertificateIssuer() throws VerificationException {
-
         Assertions.assertNotNull(sslBundles);
         X509Certificate cert = X509CertUtils.parse(sidCertStr);
         keyShareApiService.checkCertificateIssuer(cert);
