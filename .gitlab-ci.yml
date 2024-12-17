@@ -13,17 +13,25 @@ variables:
   script:
     - source load-env.sh
     - cd shares-server
+    - SHARES_SERVER_VERSION="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-${CI_COMMIT_SHORT_SHA}"
     - >
       mvn -s $MAVEN_SETTINGS spring-boot:build-image
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
       -Dspring-boot.build-image.publish=true 
-      -Dspring-boot.build-image.imageName=${DOCKER_REGISTRY}cdoc2-shares-server/shares-server:${SHARES_SERVER_VERSION} 
+      -Dspring-boot.build-image.imageName=${CI_REGISTRY_IMAGE}/cdoc2-shares-server:${SHARES_SERVER_VERSION} 
       -Dspring-boot.build-image.createdDate=now 
       -Dmaven.test.skip=true
       -Dhttp.proxy=$BUILD_HTTP_PROXY
       -Dhttps.proxy=$BUILD_HTTPS_PROXY
-      -Ddocker.publishRegistry.url=${DOCKER_REGISTRY}
+      -Ddocker.publishRegistry.url=${CI_REGISTRY_IMAGE}
       -Ddocker.publishRegistry.username=${CI_REGISTRY_USER}
       -Ddocker.publishRegistry.password=${CI_REGISTRY_PASSWORD}
+    - |
+      if $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      then 
+        docker tag ${CI_REGISTRY_IMAGE}/cdoc2-shares-server:${SHARES_SERVER_VERSION} ${CI_REGISTRY_IMAGE}/cdoc2-shares-server:latest
+        docker push ${CI_REGISTRY_IMAGE}/cdoc2-shares-server:latest
+      fi
 
 stages:
   - test
