@@ -191,7 +191,7 @@ yS//HS9wVyAOtzIHDyLGRZfoWzm8WinYKg9gFBf4keqhHEJMKQfMxeSMcLw=
             .build();
 
         
-        token.sign(jwsSigner, testSemanticsIdentifier); // header "kid" PNOEE-30303039914
+        token.sign(jwsSigner);
 
         return token.createTicketForShareId(shareId);
     }

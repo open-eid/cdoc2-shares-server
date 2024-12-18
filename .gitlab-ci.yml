@@ -26,12 +26,17 @@ variables:
       -Ddocker.publishRegistry.url=${CI_REGISTRY_IMAGE}
       -Ddocker.publishRegistry.username=${CI_REGISTRY_USER}
       -Ddocker.publishRegistry.password=${CI_REGISTRY_PASSWORD}
+    - apt-get update && apt-get install -y docker.io
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker build -t ${CI_REGISTRY_IMAGE}/cdoc2-shares-server-liquibase:${SHARES_SERVER_VERSION} ../server-db/src/main/resources/db
+    - docker push ${CI_REGISTRY_IMAGE}/cdoc2-shares-server-liquibase:${SHARES_SERVER_VERSION}
     - |
       if $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       then 
         docker tag ${CI_REGISTRY_IMAGE}/cdoc2-shares-server:${SHARES_SERVER_VERSION} ${CI_REGISTRY_IMAGE}/cdoc2-shares-server:latest
         docker push ${CI_REGISTRY_IMAGE}/cdoc2-shares-server:latest
       fi
+    
 
 stages:
   - test

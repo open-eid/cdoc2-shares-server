@@ -11,7 +11,7 @@
 
 	<groupId>ee.cyber.cdoc2</groupId>
 	<artifactId>cdoc2-shares-server</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>0.3.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cdoc2-shares-server</name>
@@ -193,9 +193,9 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>ee.cyber.cdoc2.auth</groupId>
-			<artifactId>cdoc2-key-shares-auth</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<groupId>ee.cyber.cdoc2</groupId>
+			<artifactId>cdoc2-auth-token</artifactId>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -478,7 +478,9 @@
 							<!--suppress UnresolvedMavenProperty -->
 							<BP_DEPENDENCY_MIRROR>${bp.dependency.mirror}</BP_DEPENDENCY_MIRROR>
 							<BPL_SPRING_CLOUD_BINDINGS_DISABLED>true</BPL_SPRING_CLOUD_BINDINGS_DISABLED>
+							<!--suppress UnresolvedMavenProperty -->
 							<HTTP_PROXY>${http.proxy}</HTTP_PROXY>
+							<!--suppress UnresolvedMavenProperty -->
 							<HTTPS_PROXY>${https.proxy}</HTTPS_PROXY>
 						</env>
 						<!--suppress UnresolvedMavenProperty -->

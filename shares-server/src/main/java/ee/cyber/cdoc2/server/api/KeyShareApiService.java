@@ -3,11 +3,9 @@ package ee.cyber.cdoc2.server.api;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.util.X509CertUtils;
 import ee.cyber.cdoc2.auth.AuthTokenVerifier;
-import ee.cyber.cdoc2.auth.IllegalCertificateException;
-import ee.cyber.cdoc2.auth.SIDCertificateUtil;
+import ee.cyber.cdoc2.auth.exception.IllegalCertificateException;
 import ee.cyber.cdoc2.auth.ShareAccessData;
-import ee.cyber.cdoc2.auth.VerificationException;
-import jakarta.annotation.Nullable;
+import ee.cyber.cdoc2.auth.exception.VerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,24 +14,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,10 +43,6 @@ import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import static ee.cyber.cdoc2.auth.Constants.NONCE;
-import static ee.cyber.cdoc2.auth.Constants.SERVER_BASE_URL;
-import static ee.cyber.cdoc2.auth.Constants.SHARE_ACCESS_DATA;
-import static ee.cyber.cdoc2.auth.Constants.SHARE_ID;
 import static ee.cyber.cdoc2.server.Utils.getPathAndQueryPart;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -72,8 +55,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Slf4j
 @RequiredArgsConstructor
 public class KeyShareApiService implements KeySharesApiDelegate {
-
-    private static final String VALUE_IS_MISSING = "value is missing";
 
     private final NativeWebRequest nativeWebRequest;
 
@@ -247,7 +228,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
      * @param shareId requested shareId (will be compared to shareId in authTicket)
      * @param xAuthTicket SD-JWT authticket that was generated for requested <code>shareId</code>
      * @param x5c <code>xAuthTicket</code> signer certificate in PEM format. Certificate subject/SERIALNUMBER must match
-     *            <code>xAuthTicket</code> header "kid"
+     *            <code>xAuthTicket</code> body "iss" without "etsi/" prefix.
      * @return "iss" of SD-JWT, represents authToken issuer identify. Example "etsi/PNOEE-30303039914"
      * @throws VerificationException if authTicket validation fails
      * @throws ResponseStatusException status 404, when shareId or nonce is not found from DB or nonce is expired
@@ -260,20 +241,18 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         // check that SD-JWT is signed with x5c
         try {
             X509Certificate cert = X509CertUtils.parseWithException(x5c);
-            // check that x5c is issued by trustworthy CA
-            checkCertificateIssuer(cert);
 
-            // check that certificate subject.serialnumber matches to sdjwt.header.kid
+            KeyStore sidTrustedIssuers = sslBundles.getBundle("sid-trusted-issuers").getStores().getTrustStore();
+
+            AuthTokenVerifier tokenVerifier = new AuthTokenVerifier(sidTrustedIssuers, revocationCheckEnabled);
+            // check that certificate subject.serialnumber matches to sdjwt.body.iss
+            // check that x5c is issued by trustworthy CA
             // signature is valid
+            // jwt.body.iss matches subject/serialnumber in cert
             // disclose hidden claims
-            verifiedClaims = AuthTokenVerifier.getVerifiedClaims(xAuthTicket, cert,
-                SIDCertificateUtil::getSemanticsIdentifier);
+            verifiedClaims = tokenVerifier.getVerifiedClaims(xAuthTicket, cert);
             log.debug("claims: {}", verifiedClaims);
 
-            // check that "iss" matches subject/serialnumber in cert
-            String ticketIss = obj2String(verifiedClaims.get("iss"));
-            String certSubjectSerial = SIDCertificateUtil.getSemanticsIdentifier(cert);
-            checkIssuerMatchesCertSubject(ticketIss, certSubjectSerial);
         } catch (JOSEException | ParseException | CertificateException | IllegalCertificateException e) {
             throw new VerificationException("Ticket processing error", e);
         }
@@ -282,63 +261,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         checkTicketAudience(shareId, verifiedClaims);
 
         return obj2String(verifiedClaims.get("iss"));
-    }
-
-    /**
-     * For SID cert, check that certificate subject.serialnumber matches with authTicket "iss" claim
-     * @param ticketIssuer "iss" value from authTicket, example "etsi/PNOEE-30303039914"
-     * @param certSubjectSerial serialnumber from certificate, example "PNOEE-30303039914"
-     * @throws VerificationException if subject.serialnumber validation has failed
-     */
-    protected void checkIssuerMatchesCertSubject(@Nullable String ticketIssuer, String certSubjectSerial)
-        throws VerificationException {
-
-        if ((ticketIssuer == null) || !ticketIssuer.startsWith("etsi/")) {
-            throw new VerificationException("\"iss\" does not start \"etsi/\"");
-        }
-
-        if (!ticketIssuer.substring("etsi/".length()).equals(certSubjectSerial)) {
-            throw new VerificationException("subject serial "
-                + certSubjectSerial + " doesn't match to iss " + ticketIssuer);
-        }
-    }
-
-    protected void checkCertificateIssuer(X509Certificate cert) throws VerificationException {
-
-        // enable certpath validation debug logging by setting security property
-        // -Djava.security.debug=certpath.ocsp,ocsp,verbose
-
-        try {
-            KeyStore trustStore = sslBundles.getBundle("sid-trusted-issuers").getStores().getTrustStore();
-
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            CertPath certPath = cf.generateCertPath(Collections.singletonList(cert));
-
-            Security.setProperty("com.sun.security.enableCRLDP", "false");
-            Security.setProperty("ocsp.enable", "true");
-            // Initialize PKIXParameters
-            PKIXParameters pkixParams = new PKIXParameters(trustStore);
-
-            // SK ocsp demo env is a minefield 💣
-            // https://github.com/SK-EID/ocsp/wiki/SK-OCSP-Demo-environment
-            // experimental, doesn't work for
-            // TODO: RM-3218: implement properly including client side OCSP stapling support
-            // enable/disable OCSP checking through application.properties
-            pkixParams.setRevocationEnabled(revocationCheckEnabled);
-
-            CertPathValidator validator = CertPathValidator.getInstance("PKIX");
-
-            validator.validate(certPath, pkixParams); // if the CertPath does not validate,
-                                                      // an CertPathValidatorException will be thrown
-            Date now = new Date();
-            if (now.after(cert.getNotAfter())) {
-                throw new VerificationException("Certificate expired on " + cert.getNotAfter());
-            }
-
-        } catch (NoSuchAlgorithmException | CertificateException | CertPathValidatorException | KeyStoreException
-                 | InvalidAlgorithmParameterException e) {
-            throw new VerificationException("Certificate validation error", e);
-        }
     }
 
     /**
@@ -360,7 +282,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             // check protocol, host and port
             if ((ticketBaseURL.getHost() == null) || !ticketBaseURL.getHost().equals(reqURL.getHost())
                 || ticketBaseURL.getProtocol() == null || !ticketBaseURL.getProtocol().equals(reqURL.getProtocol())
-                || ticketBaseURL.getPort() != reqURL.getPort() //TODO: handle default ports
+                || ticketBaseURL.getPort() != reqURL.getPort()
             ) {
                 throw new VerificationException("protocol, host or port in ticket and request don't match ("
                     + shareAccessData.getServerBaseUrl() + "!="
@@ -372,10 +294,35 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             }
 
             checkNonceFromDB(shareAccessData.getShareId(), shareAccessData.getNonce());
-        } catch (MalformedURLException | ParseException ex) {
+        } catch (MalformedURLException ex) {
             log.error("Error validating \"aud\" data", ex);
             throw new VerificationException("Error validating \"aud\" data", ex);
         }
+    }
+
+    private ShareAccessData extractShareAccessData(Map<String, Object> verifiedClaims) throws VerificationException {
+
+        Object audObject = verifiedClaims.get("aud");
+        if (audObject == null) {
+            throw new VerificationException("\"aud\" claim is missing");
+        }
+
+        if (audObject instanceof List<?> audList) {
+            if (audList.size() == 1) {
+                String aud = obj2String(audList.get(0));
+                if (aud != null) {
+                    try {
+                        return ShareAccessData.fromURL(new URL(aud));
+                    } catch (MalformedURLException ex) {
+                        throw new VerificationException("Error parsing url from \"aud\"", ex);
+                    }
+                }
+            } else {
+                throw new VerificationException("Expected exactly one element in \"aud\"");
+            }
+        }
+
+        throw new VerificationException("Error parsing \"aud\"");
     }
 
     /**
@@ -404,56 +351,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
     }
 
-    /**
-     * <code>jsonMap</code> is following json:
-     * <pre>
-     *         {
-     *          "shareAccessData":[{
-     *            "shareId":"ff0102030405060708090a0b0c0e0dff",
-     *            "serverNonce":"AAECAwQFBgcICQoLDA4N_w",
-     *            "serverBaseURL":"https://localhost:8443"
-     *          }]
-     *         }
-     * </pre>
-     * convert to Map using Jackson <code>ObjectMapper</code>:
-     * <code>
-     *     Map<String, Object> map = objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {});
-     * </code>
-     * @param jsonMap JSON map
-     * @return ShareAccessData object
-     * @throws ParseException if parsing has failed
-     */
-    ShareAccessData extractShareAccessData(Map<String, Object> jsonMap) throws ParseException {
-
-        Object listObj = jsonMap.get(SHARE_ACCESS_DATA);
-        log.debug("sd-jwt {}={}", SHARE_ACCESS_DATA, listObj);
-        if (listObj instanceof Collection<?> collection) {
-            if (collection.size() != 1) {
-                throw new ParseException("Expected \"" + SHARE_ACCESS_DATA + "\" to be an array", 0);
-            }
-
-            Object firstObj = collection.toArray()[0];
-            if (firstObj instanceof Map<?, ?> map) {
-                String baseURL = obj2String(map.get(SERVER_BASE_URL));
-                if (baseURL == null) {
-                    throw new ParseException("\"" + SERVER_BASE_URL + "\" " + VALUE_IS_MISSING, 0);
-                }
-                String shareId = obj2String(map.get(SHARE_ID));
-                if (shareId == null) {
-                    throw new ParseException("\"" + SHARE_ID + "\" " + VALUE_IS_MISSING, 0);
-                }
-                String nonce = obj2String(map.get(NONCE));
-                if (nonce == null) {
-                    throw new ParseException("\"" + NONCE + "\" " + VALUE_IS_MISSING, 0);
-                }
-
-                return new ShareAccessData(baseURL, shareId, nonce);
-            }
-        }
-
-        throw new ParseException("Failed to parse \"" + SHARE_ACCESS_DATA + "\"", 0);
-    }
-
     protected static URL extractRequestURL(NativeWebRequest nativeWebRequest) throws MalformedURLException {
         if (nativeWebRequest == null) {
             throw new IllegalArgumentException("nativeRequest not initialized"); // http 500, should not happen normally
@@ -475,7 +372,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             //String params = req.getQueryString(); // Query parameters, if any
 
             String url = scheme + "://" + hostname
-                + (("80".equals(port) || "443".equals(port)) ? "" : ":" + port)
+                +  ":" + port // port should be explicitly be part of url even for port 80/443
                 + path;
                 //+ ((params == null) ? "": "?" + params)
 
