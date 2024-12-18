@@ -3,7 +3,6 @@ package ee.cyber.cdoc2.server.api;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.nimbusds.jose.util.X509CertUtils;
-import ee.cyber.cdoc2.auth.VerificationException;
 import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
@@ -20,7 +19,6 @@ import org.springframework.boot.ssl.SslBundles;
 
 import org.springframework.web.context.request.NativeWebRequest;
 
-import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -62,25 +60,28 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     // pre-generated using cdoc2-java-ref-impl AuthTokenCreatorTest::testCreateAuthToken test
     // generated with SID demo env
     private static final String AUTH_TICKET = """
-        eyJraWQiOiJQTk9FRS0zMDMwMzAzOTkxNCIsInR5cCI6InZuZC5jZG9jMi5DQ1MtYXV0aC10b2tlbi52MStzZC1qd3QiLCJh
-        bGciOiJSUzI1NiJ9.eyJpc3MiOiJldHNpL1BOT0VFLTMwMzAzMDM5OTE0IiwiX3NkIjpbImdNWlkwTnJvRUdHNjZnQlY2S2N
-        zU2l6WGJfaU1aNDdDVnpvb3otdHBBMU0iXSwiZXhwIjoxNzMyMDM1MTk0LCJpYXQiOjE3MzIwMzUxMzQsIl9zZF9hbGciOiJ
-        zaGEtMjU2In0.j0F_VK5_njK3TdhvUIUGi54gQMQRFFfbXZGvCDRjlNVsl_4u2U7qb2SHr8vm3kmMZYZgNGk_moJApMMXX3O
-        arct4xpXFSWZa0LOZ-oVCew-GE0iwK9te9oPiUwdYKSrCRDUJRvznS7d3LBslMS6_RgXfTm--h29pOTUZ0LsxIz_QRXGtR5r
-        mhzpq_H8M_2q2EDkSBV9_rRbFZmJdzHCCk7zfrT6bTvi1qaCbkFRpvlQnBmB5IV5MVN-NlWouQiWQolGLYkJQe1C4-7doi9G
-        xSNLy8e9sHCYxjadYr7tfMalTNFcdnONM6kIl3y_Nk3t9TdnY7RDhBBt5zLpZDbj3xYBIkD_Ae9mepkRi2FkhWf4mHAad69Q
-        tON6ia8BqlfsZSrtLCZc9ugbvyMRtiyr6OzrZELE0yaWzZNhYG04KOxw-my3CRQdGdUanXw072thCXq316gogYi2W4boFh8C
-        CljrML4mLPb27LgYI6uht6wxEzDoFQhqNEoKbaiwr_DwF7Bje51wWFWaABIFD3zyYsnmQ6qnCclUrNW5Xd4CWd2HpIJOgaUZ
-        0gRDiucsr10bMjprtePd-UG5rDsqqsVsyxjBwkK_c8iRoHk4nBrugHl1NZJZzV3SOz0eyZEedAQESmEG3JcqXq8o7Dz7Sr3I
-        NKwhYBHjpx4yQfEO3B38C245QT3hvpvaJSYVxk1dIPMabu2e6aduA8SLfnvgrJ0RDhJJEWqKhP4VJLz4O6U5BxADsMm-G6x8
-        yFtONTZFbDz8YJMG_qSBab2gXVZKg-DCAo3IpvgS45-mHTkS2hwfKpBKLnnfii-sAjKq2ghnzQp5cWr5mGyDCB0iKAQb8E07
-        odChanbEt_WlXVyknpMhOFksubvw8np4cujyrhj6rJgOA6TqzzfSEkfd09xotXqZi1v20Wa9-I2fFwoKsm8r1ydBiG52-j0R
-        AVESxkrCBtkcFM-HUomvA8GTZKY-efzsENuTSX3TxXqxvOvvUfWQRBANnnPZlopkn0Y3NzgmyCPgA~WyJFVDU3b0Z0MHhoUX
-        FjZlhSTTNnMW53Iiwic2hhcmVBY2Nlc3NEYXRhIixbeyIuLi4iOiJfQ1hraXVDVHdJZUpEellFbmdQSkhWcnlrYmdfRUtiZH
-        B0LVRKS3p5bk9rIn0seyIuLi4iOiJxWWVkZExlRzhzSEFUbjBqYm5UdUlXei1FTWgwM29zdlM4QUYtd3pPVG9FIn1dXQ~WyJ
-        Eck5fTnQxc2k3S1BscHN5eHlMQ0J3Iix7InNoYXJlSWQiOiJmZjAxMDIwMzA0MDUwNjA3MDgwOTBhMGIwYzBlMGRmZiIsInN
-        lcnZlck5vbmNlIjoiQUFFQ0F3UUZCZ2NJQ1FvTERBNE5fdyIsInNlcnZlckJhc2VVUkwiOiJodHRwczovL2xvY2FsaG9zdDo
-        4NDQzIn1d~
+        eyJ0eXAiOiJ2bmQuY2RvYzIuYXV0aC10b2tlbi52MStzZC1qd3QiLCJhbGciOiJSUzI1NiJ9
+        .
+        eyJpc3MiOiJldHNpL1BOT0VFLTMwMzAzMDM5OTE0IiwiX3NkIjpbIlZQYmtIX3ZUTGh3WEcxYWZYMXUtTTljU21HZnZNZnR4b0NDNzlpMTJSUG8
+        iXSwiX3NkX2FsZyI6InNoYS0yNTYifQ
+        .
+        II2r_TcyfZoO0zu_ltN4Gd-FYvcP-dzRuiGHOVdMVgBzYLws2nyuYrtQcthETce4EvgE6-r-TaFtSfZj7BcLvQwMX84xEwbHIDUmIxl2GMYK1u4
+        4HpK9N1QnNDTssvrMm3isyRL65dSm9siUGLZVa4sTHpR7CoUjGfpGg8NfGQjoYjdGIEsd4MuCfTKJGqFCh-W5emLf7T08RPCphcUemq028C7ZrB
+        B7-7Z8QP4XKC-yBprru9diwibALAjeuyo5lHa7vs5tu_glWs895wpIze8CYhmPadbAijOFrCP7r-KRV6V7wpl5l1DU9bXEJT5QQWdOUWJq02VYC
+        xORFmL1y6hy4ZiTFi9JoD389WWQksy8JmZKT7sFkNHt5lSuCsZEl-LoxpAxnQ0udMlx1tvZ4NMOqEruCyw0GJ8DHBWQx5fLGbkOriy2-QltBmms
+        HUKXHIVYubwWOgHbcp8HMCBakaWxxzMXJA_Xjo5FhNAVQ2fLPhXejq3t4e_SWc-We04QdptepP2CnMNn_YIzcdausPdmu3LOcYKPe3bT5wTmnr8
+        lv_Xk0eLADHKjhRQRdNQeHXcNPJ1zgAZbPOsldgXgu__uKgMwG3lrfUI9HBJ9H1XbG_nUZsFEKT-5_pct_soSWgDV8HauhkWV1qCGBqrHR_NrqF
+        S9wi-dAzEnPihUyaXhFNjpQuI2srsGU4CMXooAjqh7UJxO8hEZezkvN4SWZ62MigIfa9-7msV5pdrv5AvqEyDmW7syddqvdXoWGXRi3GsX9WXYL
+        pop_CUOa2O1ZIva9yzIHTA_RAoE7fUB9hsyq4ibaeLy25czuaRG8Ziv8GWR9DFf90Hvx1Cdg7qoa6FpqjJrLW3A5kVdaW-ebG1sb2T2Fk0kVibg
+        7TAajHKZ2GXO0kK8OJT-L9EC3703kdB4qQpw3Dcqwe5Nptoyqhl9PkbKqja-LeDMbvwvflT5X-vbGhiydmM3cLmjBti0XsBAHm2NGZpg4arJ11x
+        w5156FFrSOZvDA6oCIKYUpqcV
+        ~
+        WyJzOTVWZ3ZWRGFSY09qM0hXa2I3YlhRIiwiYXVkIixbeyIuLi4iOiJCbEtoRnJSZlVjM3hLRlFmU2xZUzQyaWxsbXVoS2YzZUNKa2EyYXNfRlR
+        vIn0seyIuLi4iOiJtellSVk9lTmROZl9uXzB3ZVdSYTg3NUtZYnRINTFRVEowWUtHRm1acUZNIn1dXQ
+        ~
+        WyJYU2ZPUkpYdGZuTXk1aUZ2bFZMaGd3IiwiaHR0cHM6Ly9sb2NhbGhvc3Q6ODQ0My9rZXktc2hhcmVzL2ZmMDEwMjAzMDQwNTA2MDcwODA5MGE
+        wYjBjMGUwZGZmP25vbmNlXHUwMDNkQUFFQ0F3UUZCZ2NJQ1FvTERBNE5fdyJd
+        ~
         """.replaceAll("\\s", ""); //remove all whitespace
 
     // SID demo env cert for 30303039914 that automatically authenticates successfully
@@ -164,11 +165,5 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
         assertArrayEquals(SHARE, resp.getBody().getShare());
     }
 
-    @Test
-    void testCheckCertificateIssuer() throws VerificationException {
-        Assertions.assertNotNull(sslBundles);
-        X509Certificate cert = X509CertUtils.parse(sidCertStr);
-        keyShareApiService.checkCertificateIssuer(cert);
-    }
 
 }
