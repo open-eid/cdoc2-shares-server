@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.3</version>
+		<version>3.4.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -28,14 +28,14 @@
 
 		<tests>!(pkcs11 | slow)</tests>
 
-		<spring-boot.version>3.3.3</spring-boot.version>
-		<spring.version>6.1.6</spring.version>
-		<org-testcontainers.version>1.19.8</org-testcontainers.version>
-		<micrometer.version>1.13.3</micrometer.version>
-		<logback-classic.version>1.5.7</logback-classic.version>
+		<spring-boot.version>3.4.1</spring-boot.version>
+		<spring.version>6.2.1</spring.version>
+		<org-testcontainers.version>1.20.4</org-testcontainers.version>
+		<micrometer.version>1.14.2</micrometer.version>
+		<logback-classic.version>1.5.16</logback-classic.version>
         <!-- https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html#appendix.dependency-versions.properties-->
         <!-- force usage of newer logback as SB 3.2.5 depends on vulnerable 1.4.14 -->
-        <logback.version>1.5.7</logback.version>
+        <logback.version>1.5.16</logback.version>
 	</properties>
 
 	<profiles>
@@ -311,7 +311,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.3.1</version>
+			<version>5.4.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

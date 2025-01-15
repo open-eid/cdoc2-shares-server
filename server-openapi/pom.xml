@@ -21,9 +21,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <swagger-annotations.version>2.2.22</swagger-annotations.version>
-        <jackson.version>2.17.2</jackson.version>
+        <jackson.version>2.18.2</jackson.version>
         <maven-plugin.version>1.0.0</maven-plugin.version>
-        <spring-boot.version>3.3.3</spring-boot.version>
+        <spring-boot.version>3.4.1</spring-boot.version>
         <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
         <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
 
