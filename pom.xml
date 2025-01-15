@@ -31,12 +31,12 @@
 
 		<!-- versions of dependencies has to correspond with spring boot version-->
 		<!-- https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html-->
-		<junit-jupiter.version>5.10.3</junit-jupiter.version>
-		<lombok.version>1.18.34</lombok.version>
-		<logback-classic.version>1.5.7</logback-classic.version>
+		<junit-jupiter.version>5.11.4</junit-jupiter.version>
+		<lombok.version>1.18.36</lombok.version>
+		<logback-classic.version>1.5.16</logback-classic.version>
 		<exec-maven-plugin.version>3.4.10</exec-maven-plugin.version>
-		<spring-boot.version>3.3.3</spring-boot.version>
-		<spring.version>6.1.6</spring.version>
+		<spring-boot.version>3.4.1</spring-boot.version>
+		<spring.version>6.2.1</spring.version>
 
   	</properties>
 
