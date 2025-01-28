@@ -11,7 +11,7 @@
 
 	<groupId>ee.cyber.cdoc2</groupId>
 	<artifactId>cdoc2-shares-server</artifactId>
-	<version>0.3.0-SNAPSHOT</version>
+	<version>0.4.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cdoc2-shares-server</name>
@@ -64,27 +64,19 @@
 					<version>SID-1.6.1-SNAPSHOT</version>
 					<scope>test</scope>
 				</dependency>
-				<!-- nimbus-jose-jwt JWK.parseFromPEMEncodedObjects() fails run-time with ClassNotFound for
-                 org/bouncycastle/openssl/jcajce/JcaPEMKeyConverter . Fix it -->
-				<dependency>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcpkix-jdk18on</artifactId>
-					<version>1.78</version>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
+        </dependencies>
+    </profile>
 
-		<profile>
-			<id>excludePkcs11AndSlowTests</id>
-			<properties>
-				<tests>!(pkcs11 | slow)</tests>
-			</properties>
-		</profile>
+    <profile>
+        <id>excludePkcs11AndSlowTests</id>
+        <properties>
+            <tests>!(pkcs11 | slow)</tests>
+        </properties>
+    </profile>
 
-		<profile>
-			<id>github_ci_fork</id>
-			<!-- for forks use base maven repo "open-eid/cdoc2-java-ref-impl" -->
+    <profile>
+        <id>github_ci_fork</id>
+        <!-- for forks use base maven repo "open-eid/cdoc2-java-ref-impl" -->
 			<activation>
 				<property>
 					<!-- defined by maven.yml for forks only -->
@@ -195,7 +187,7 @@
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
 			<artifactId>cdoc2-auth-token</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>0.3.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

@@ -8,7 +8,9 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
+import java.util.Set;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.JWK;
@@ -172,11 +174,14 @@ yS//HS9wVyAOtzIHDyLGRZfoWzm8WinYKg9gFBf4keqhHEJMKQfMxeSMcLw=
 
         JWK jwk = JWK.parseFromPEMEncodedObjects(TEST_RSAKEY);
         RSAKey privateKey = jwk.toRSAKey();
-//        RSAKey rsaPublicJWK = new RSAKey.Builder(privateKey.toRSAPublicKey())
-//            .keyID(etsi.toString())
-//            .build();
 
-        JWSSigner jwsSigner = new RSASSASigner(privateKey);
+        JWSSigner jwsSigner = new RSASSASigner(privateKey) {
+            // Smart-ID JWSSigner supports only RS256
+            @Override
+            public Set<JWSAlgorithm> supportedJWSAlgorithms() {
+                return Set.of(JWSAlgorithm.RS256);
+            }
+        };
 
         AuthTokenCreator token = AuthTokenCreator.builder()
             .withEtsiIdentifier(etsi) // "iss" field etsi/PNOEE-30303039914
@@ -184,10 +189,6 @@ yS//HS9wVyAOtzIHDyLGRZfoWzm8WinYKg9gFBf4keqhHEJMKQfMxeSMcLw=
                 serverUrl,
                 shareId,
                 nonce))
-//            .withShareAccessData(new ShareAccessData(
-//                "https://cdoc-ccs.smit.ee:443/key-shares/",
-//                "5BAE4603-C33C-4425-B301-125F2ACF9B1E",
-//                "9d23660840b427f405009d970d269770417bc769"))
             .build();
 
         
