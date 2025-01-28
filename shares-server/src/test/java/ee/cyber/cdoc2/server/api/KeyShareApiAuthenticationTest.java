@@ -165,5 +165,4 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
         assertArrayEquals(SHARE, resp.getBody().getShare());
     }
 
-
 }

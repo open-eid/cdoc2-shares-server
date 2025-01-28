@@ -11,3 +11,4 @@ LIQUIBASE_IMAGE_NAME=cdoc2-shares-server-liquibase
 # version shows what version of shares-server is used in pair with liquibase image
 # Docker version should be same as shares-server-version although server-db pom version might be different
 docker build -t ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${LIQUIBASE_IMAGE_NAME}:${SHARES_SERVER_VERSION} ../server-db/src/main/resources/db
+docker tag ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${LIQUIBASE_IMAGE_NAME}:${SHARES_SERVER_VERSION}  ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${LIQUIBASE_IMAGE_NAME}:latest
