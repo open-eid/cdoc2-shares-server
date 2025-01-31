@@ -11,7 +11,7 @@
 
 	<groupId>ee.cyber.cdoc2</groupId>
 	<artifactId>cdoc2-shares-server</artifactId>
-	<version>0.4.0-SNAPSHOT</version>
+	<version>0.4.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cdoc2-shares-server</name>
@@ -187,7 +187,7 @@
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
 			<artifactId>cdoc2-auth-token</artifactId>
-			<version>0.3.2-SNAPSHOT</version>
+			<version>0.3.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
