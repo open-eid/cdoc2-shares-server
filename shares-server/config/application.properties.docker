@@ -1,5 +1,8 @@
 # Configuration file for running in Docker container
 
+# On Java21 VM enable virtual threads for additional throughput
+spring.threads.virtual.enabled=true
+
 server.ssl.key-store-type=PKCS12
 # The path to the keystore containing the certificate
 server.ssl.key-store=/config/cdoc2server.p12
@@ -54,6 +57,12 @@ management.endpoint.health.enabled=true
 management.endpoint.startup.enabled=true
 management.endpoint.prometheus.enabled=true
 management.endpoint.health.show-details=always
+
+# expose only liveness, readiness and database indicators for /actuator/health endpoint
+management.health.defaults.enabled=false
+management.health.livenessState.enabled=true
+management.health.readinessState.enabled=true
+management.health.db.enabled=true
 
 # expose endpoints
 management.endpoints.web.exposure.include=info,health,startup,prometheus
