@@ -1,4 +1,6 @@
-# Not up to date, see https://github.com/open-eid/cdoc2-java-ref-impl/test/README.md for working docker example
+# May not be up to date, see
+# https://github.com/open-eid/cdoc2-java-ref-impl/tree/SID/test/config/shares-server
+# https://github.com/open-eid/cdoc2-java-ref-impl/tree/master/test/config/shares-server
 services:
   cdoc2-shares-postgres:
     container_name: cdoc2-shares-postgres
@@ -18,24 +20,20 @@ services:
 
   cdoc2-shares-server-liquibase:
     container_name: cdoc2-shares-server-liquibase
-    image: liquibase/liquibase:4.19
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/cdoc2-shares-server-liquibase:${SHARES_SERVER_VERSION}
     depends_on:
       cdoc2-shares-postgres:
         condition: service_started
-    volumes:
-      - ./server-db/src/main/resources/db/changelog/changes/:/liquibase/cdoc2/db/changelog/changes/
-      - ./server-db/src/main/resources/db/changelog/db.changelog-master.yaml:/liquibase/cdoc2/db.changelog-master.yaml
-      - ./server-db/src/main/resources/db/liquibase.properties.docker:/liquibase/cdoc2/liquibase.properties
     environment:
       - POSTGRES_URL=${POSTGRES_URL}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    command: liquibase --url="jdbc:postgresql://${POSTGRES_URL}/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}" --defaults-file=/liquibase/cdoc2/liquibase.properties update
+    command: --url="jdbc:postgresql://${POSTGRES_URL}/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}" --defaultsFile=liquibase.properties update
 
   shares-server:
     container_name: shares-server
-    image: ${DOCKER_REGISTRY}cdoc2-shares-server/shares-server:${SHARES_SERVER_VERSION}
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/cdoc2-shares-server:${SHARES_SERVER_VERSION}
     ports:
       - "8443:8443"
       # monitoring
@@ -67,7 +65,7 @@ services:
   # second instance of shares-server, according to configured key-shares.properties in cdoc2-java-ref-impl repository
   shares-server-second:
     container_name: shares-server-second
-    image: ${DOCKER_REGISTRY}cdoc2-shares-server/shares-server:${SHARES_SERVER_VERSION}
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/cdoc2-shares-server:${SHARES_SERVER_VERSION}
     ports:
       - "8442:8442"
       # monitoring
@@ -105,4 +103,4 @@ configs:
   keystore:
     file: ./keys/cdoc2server.p12
   sid-trusted-issuers-truststore:
-      file: ./shares-server/test/resources/sid-trusted-issuers/test_sid_trusted_issuers.jks
+      file: ./shares-server/src/test/resources/sid-trusted-issuers/test_sid_trusted_issuers.jks

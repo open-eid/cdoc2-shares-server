@@ -22,7 +22,7 @@ and [DigiDoc4-Client](https://github.com/open-eid/DigiDoc4-Client) for CDOC2 enc
 
 Depends on:
 * https://github.com/open-eid/cdoc2-openapi OpenAPI specifications for server stub generation
-* https://github.com/open-eid/cdoc2-java-ref-impl (for tests only, use `-Dmaven.test.skip=true` to skip)
+* https://github.com/open-eid/cdoc2-java-ref-impl (for unit tests only, use `-Dmaven.test.skip=true` to skip)
 
 Configure github package repo access
 https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token
@@ -57,6 +57,15 @@ So defining single Maven package repo from `open-eid` is enough for pulling cdoc
 mvn clean install
 ```
 
+To build Docker images:
+```bash
+./build-images.sh
+```
+```
+[INFO] Successfully built image 'ghcr.io/open-eid/cdoc2-shares-server:0.4.1-SNAPSHOT'
+[INFO] Successfully created image tag 'ghcr.io/open-eid/cdoc2-shares-server:latest'
+```
+
 ### GitHub workflow build
 
 Maven build is executed for GH event `pull_request` an and `push` to 'master'.
@@ -69,19 +78,42 @@ by [defining repository variable](https://docs.github.com/en/actions/writing-wor
 
 ### Running
 
-See [getting-started.md](getting-started.md) and [admin-guide.md](admin-guide.md)
+See [getting-started.md](getting-started.md) and  [admin-guide.md](admin-guide.md)
 
 ### Running pre-built Docker/OCI images
 
-See [cdoc2-java-ref-impl](https://github.com/open-eid/cdoc2-java-ref-impl)/test/config/shares-server/docker-compose.yml
+Pre-built images can be found <https://github.com/orgs/open-eid/packages?ecosystem=container>
 
-## Releasing and versioning
+Quickstart:
+```bash
+docker compose up -d
+curl -k https://localhost:18443/actuator/info
+echo "Run 'docker compose down' to shut down 'cdoc2-shares-server'"
+```
 
-See [VERSIONING.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/VERSIONING.md)
+```bash
+curl -i -k -X POST https://localhost:8443/key-shares \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' \
+-d '{"share":"dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdHRlc3QK","recipient":"etsi/PNOEE-30303039914"}'
+```
+```
+HTTP/1.1 201 
+Location: /key-shares/ee368ad654142dda1d9d8e00744df2c8
+```
+
+For more info see [admin-guide.md](admin-guide.md) and other existing configurations:
+
+* [cdoc2-java-ref-impl/test/config/shares-server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/blob/SID/test/config/shares-server/docker-compose.yml) _TODO: update branch SID->master after release_
+* [cdoc2-gatling-tests/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/) _TODO: update links_
+
+For end-to-end tests see
+[cdoc2-java-ref-impl/test/bats/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/tree/SID/test#running-smart-idmobile-id-tests-experimental) _TODO: update branch SID->master_
 
 ### GitHub release
 
-[Create release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release) on tag done by [VERSIONING.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/VERSIONING.md) process. 
-It will trigger `maven-release.yml` workflow that will deploy Maven packages to GitHub Maven package repository
-and build & publish Docker/OCI images.
+[Create release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release). Tag name is used as built image version, so it should start with shares-server version 
+from [shares-server/pom.xml](shares-server/pom.xml).
+It will trigger [`maven-release.yml`](.github/workflows/maven-release.yml) workflow that will deploy Maven packages to GitHub Maven package repository
+and build & publish Docker/OCI images. Docker images are published to <https://github.com/orgs/open-eid/packages?ecosystem=container>
 

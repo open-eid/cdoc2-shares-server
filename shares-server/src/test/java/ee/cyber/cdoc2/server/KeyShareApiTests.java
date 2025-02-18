@@ -50,6 +50,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
 
         Optional<KeyShare> response = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM);
 
+
         assertTrue(response.isPresent());
         KeyShare savedKeyShare = response.get();
         assertEquals(keyShare.getRecipient(), savedKeyShare.getRecipient());
@@ -157,6 +158,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         builder.withUsername(configProperties.username());
         builder.withPassword(configProperties.password());
         builder.withTrustKeyStore(CLIENT_TRUST_STORE);
+        builder.withDebuggingEnabled(true);
 
         return builder.build();
     }
