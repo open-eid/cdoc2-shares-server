@@ -10,11 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyStore;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
@@ -25,6 +27,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.http.HttpStatus;
@@ -32,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApi;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApiController;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApiDelegate;
@@ -56,6 +63,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequiredArgsConstructor
 public class KeyShareApiService implements KeySharesApiDelegate {
 
+    private final AuthCertificateConfigProperties certificateConfig;
+
     private final NativeWebRequest nativeWebRequest;
 
     private final KeyShareRepository keyShareRepository;
@@ -65,9 +74,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     // configure sslBundles in application.properties
     // https://docs.spring.io/spring-boot/reference/features/ssl.html#features.ssl.pem
     private final SslBundles sslBundles;
-
-    @Value("${cdoc2.auth-x5c.revocation-checks.enabled:false}")
-    private boolean revocationCheckEnabled;
 
     @Value("${cdoc2.nonce.expiration.seconds:300}")
     private long nonceExpirationSeconds;
@@ -131,22 +137,32 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
     }
 
+    /**
+     * Get key share by shareId
+     * @param shareId requested shareId
+     * @param xAuthTicket SD-JWT authticket
+     * @param xAuthCert <code>xAuthTicket</code> signer certificate in PEM format.
+     * @return response with capsule or with error status
+     */
     @Override
     public ResponseEntity<KeyShare> getKeyShareByShareId(
         String shareId,
         String xAuthTicket,
         String xAuthCert
-) {
+    ) {
         // check xAuthTicket
         String ticketRecipient; // "etsi/PNOEE-30303039914"
         try {
-            ticketRecipient = validateAuthTicket(shareId, xAuthTicket, xAuthCert);
-        } catch (VerificationException ve) {
-
+            X509Certificate cert = X509CertUtils.parseWithException(xAuthCert);
+            if (certificateConfig.signCertForbidden()) {
+                verifyCertificateUsagePurpose(cert);
+            }
+            ticketRecipient = validateAuthTicket(shareId, xAuthTicket, cert);
+        } catch (CertificateException | VerificationException ex) {
             if (log.isDebugEnabled()) {
-                log.debug("Auth ticket validation failed", ve);
+                log.debug("Auth validation has failed", ex);
             } else {
-                log.info("Auth ticket validation failed with {}", ve.getMessage());
+                log.info("Auth validation has failed with {}", ex.getMessage());
             }
 
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -227,24 +243,23 @@ public class KeyShareApiService implements KeySharesApiDelegate {
      * return the capsule.
      * @param shareId requested shareId (will be compared to shareId in authTicket)
      * @param xAuthTicket SD-JWT authticket that was generated for requested <code>shareId</code>
-     * @param x5c <code>xAuthTicket</code> signer certificate in PEM format. Certificate subject/SERIALNUMBER must match
-     *            <code>xAuthTicket</code> body "iss" without "etsi/" prefix.
+     * @param cert X.509 certificate. Certificate subject/SERIALNUMBER must match
+     *             <code>xAuthTicket</code> body "iss" without "etsi/" prefix.
      * @return "iss" of SD-JWT, represents authToken issuer identify. Example "etsi/PNOEE-30303039914"
      * @throws VerificationException if authTicket validation fails
      * @throws ResponseStatusException status 404, when shareId or nonce is not found from DB or nonce is expired
      */
-    protected String validateAuthTicket(String shareId, String xAuthTicket, String x5c)
+    protected String validateAuthTicket(String shareId, String xAuthTicket, X509Certificate cert)
         throws VerificationException {
 
         Map<String, Object> verifiedClaims;
 
         // check that SD-JWT is signed with x5c
         try {
-            X509Certificate cert = X509CertUtils.parseWithException(x5c);
-
             KeyStore sidTrustedIssuers = sslBundles.getBundle("sid-trusted-issuers").getStores().getTrustStore();
 
-            AuthTokenVerifier tokenVerifier = new AuthTokenVerifier(sidTrustedIssuers, revocationCheckEnabled);
+            AuthTokenVerifier tokenVerifier = new AuthTokenVerifier(sidTrustedIssuers,
+                certificateConfig.revocationChecksEnabled());
             // check that certificate subject.serialnumber matches to sdjwt.body.iss
             // check that x5c is issued by trustworthy CA
             // signature is valid
@@ -253,7 +268,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             verifiedClaims = tokenVerifier.getVerifiedClaims(xAuthTicket, cert);
             log.debug("claims: {}", verifiedClaims);
 
-        } catch (JOSEException | ParseException | CertificateException | IllegalCertificateException e) {
+        } catch (JOSEException | ParseException | IllegalCertificateException e) {
             throw new VerificationException("Ticket processing error", e);
         }
 
@@ -387,6 +402,42 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
     private static String obj2String(Object obj) {
         return (obj == null) ? null : obj.toString();
+    }
+
+    /**
+     * Checks user certificate purpose and verifies that signing certificate is not used for
+     * authentication.
+     * @param cert certificate to check. {@link KeyUsage#nonRepudiation} value of keyUsage means
+     *             that certificate has a signing purpose. Authentication purpose keyUsage would be
+     *             {@link KeyUsage#digitalSignature} or {@link KeyUsage#keyEncipherment} or
+     *             {@link KeyUsage#dataEncipherment}.
+     * @throws VerificationException if certificate is not valid for authentication or its purpose
+     *                               extraction has failed
+     */
+    private void verifyCertificateUsagePurpose(X509Certificate cert) throws VerificationException {
+        boolean[] keyUsages = cert.getKeyUsage();
+        if (null == keyUsages) {
+            log.error("Certificate has no keyUsage");
+            throw new VerificationException(
+                "Required extension keyUsage for certificate purpose is missing"
+            );
+        }
+        final int signingCertBits = KeyUsage.nonRepudiation;
+        try {
+            Certificate bcCert = Certificate.getInstance(ASN1Primitive.fromByteArray(cert.getEncoded()));
+            X509CertificateHolder bcX509Cert = new X509CertificateHolder(bcCert);
+            boolean isSigningCert =
+                KeyUsage.fromExtensions(bcX509Cert.getExtensions()).hasUsages(signingCertBits);
+            if (isSigningCert) {
+                String errMsg = "Signing certificate cannot be used for authentication";
+                log.error(errMsg);
+                throw new VerificationException("Signing certificate cannot be used for authentication");
+            }
+        } catch (CertificateEncodingException | IOException ex) {
+            String errMsg = "Failed to check certificate usage purpose";
+            log.error(errMsg);
+            throw new VerificationException(errMsg, ex);
+        }
     }
 
 }

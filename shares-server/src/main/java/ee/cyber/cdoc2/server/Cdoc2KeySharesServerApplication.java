@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.DbConnectionConfigProperties;
 import ee.cyber.cdoc2.server.config.MonitoringConfigProperties;
 
@@ -25,7 +26,8 @@ import ee.cyber.cdoc2.server.config.MonitoringConfigProperties;
 @RequiredArgsConstructor
 @EnableConfigurationProperties({
     MonitoringConfigProperties.class,
-    DbConnectionConfigProperties.class
+    DbConnectionConfigProperties.class,
+    AuthCertificateConfigProperties.class
 })
 @EnableScheduling
 public class Cdoc2KeySharesServerApplication implements CommandLineRunner {
