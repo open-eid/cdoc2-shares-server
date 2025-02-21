@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import com.nimbusds.jose.util.X509CertUtils;
 import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
+import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
@@ -130,7 +131,11 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     @BeforeEach
     public void setUp() {
         keyShareApiService = new KeyShareApiService(
-            mockNativeWebRequest, mockShareRep, mockNonceRep, sslBundles
+            new AuthCertificateConfigProperties(),
+            mockNativeWebRequest,
+            mockShareRep,
+            mockNonceRep,
+            sslBundles
         );
     }
 
