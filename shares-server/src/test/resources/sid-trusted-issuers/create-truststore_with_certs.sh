@@ -140,3 +140,7 @@ rm TEST_of_EE_Certification_Centre_Root_CA.pem.crt
 # add mock service certificate sk-ca.localhost.crt for testing
 keytool -import -noprompt -v -trustcacerts -file sk-ca.localhost.crt \
  -keystore test_sid_trusted_issuers.jks -alias sk-ca.localhost -storepass changeit
+
+# add generated certificate cyber-ca.localhost.pem.crt for gatling tests
+keytool -import -noprompt -v -trustcacerts -file cyber-ca.localhost.pem.crt \
+-keystore test_sid_trusted_issuers.jks -alias cyber-ca.localhost -storepass changeit

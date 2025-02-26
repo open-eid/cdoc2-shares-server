@@ -26,7 +26,7 @@ spring.datasource.username=${POSTGRES_USER}
 spring.datasource.password=${POSTGRES_PASSWORD}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.location=config/test_sid_trusted_issuers.jks
+spring.ssl.bundle.jks.sid-trusted-issuers.truststore.location=/config/sid_trusted_issuers.jks
 spring.ssl.bundle.jks.sid-trusted-issuers.truststore.password=changeit
 spring.ssl.bundle.jks.sid-trusted-issuers.truststore.type=jks
 
@@ -81,6 +81,18 @@ management.metrics.data.repository.autotime.enabled=true
 # https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/htmlsingle/#production-ready-metrics-spring-mvc
 # http.server.requests metrics
 management.metrics.web.server.auto-time-requests=true
+
+#https://github.com/spring-projects/spring-boot/issues/41880
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+
+# Enable database query metrics
+management.metrics.enable.jdbc=true
+
+# Enable query statistics (Hibernate)
+spring.jpa.properties.hibernate.generate_statistics=true
+# Enable percentiles and histogram buckets for repository metrics
+management.metrics.distribution.percentiles.spring.data.repository=0.5,0.95,0.99
+management.metrics.distribution.percentiles-histogram.spring.data.repository=true
 
 # access security must be implemented at network access rules (firewall)
 management.security.enabled=false

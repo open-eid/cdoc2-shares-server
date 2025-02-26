@@ -79,8 +79,13 @@ curl -k -X GET https://localhost:8443/key-shares/ee368ad654142dda1d9d8e00744df2c
 ```
 
 will give HTTP 401, as GET request requires `x-cdoc2-auth-ticket` and `x-cdoc2-auth-x5c` Header parameters
-that are not trivial task to create. Check out [cdoc2-java-ref-impl/cdoc2-cli/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/SID/cdoc2-cli/README.md)
-for further testing (Smart-ID/Mobile-ID) (TODO: currently `SID` branch, will be `master` in future) 
+that are not trivial task to create. 
 
+### cdoc2-shares-server additional testing
 
+Check out [cdoc2-java-ref-impl/cdoc2-cli/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/SID/cdoc2-cli/README.md)
+for further manual testing (Smart-ID/Mobile-ID) (TODO: replace with new link to `master` branch 
+after release)
 
+Alternatively run `cdoc2-shares-server` functional tests from [cdoc2-gatling-tests](https://github.com/open-eid/cdoc2-gatling-tests)
+and/or Smart-ID/Mobile-ID tests from [cdoc2-java-ref-impl/test/bats](https://github.com/open-eid/cdoc2-java-ref-impl/test)
