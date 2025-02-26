@@ -18,6 +18,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
+
   cdoc2-shares-server-liquibase:
     container_name: cdoc2-shares-server-liquibase
     image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/cdoc2-shares-server-liquibase:${SHARES_SERVER_VERSION}
@@ -56,6 +57,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - management.endpoints.metrics.username=${CDOC2_ACTUATOR_USERNAME:-actuator}
+      - management.endpoints.metrics.password=${CDOC2_ACTUATOR_PASSWORD:-change_it}
       #      - JAVA_OPTS=-Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager -Djava.security.debug=access:stack
     deploy:
       resources:
@@ -88,6 +91,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - management.endpoints.metrics.username=${CDOC2_ACTUATOR_USERNAME:-actuator}
+      - management.endpoints.metrics.password=${CDOC2_ACTUATOR_PASSWORD:-change_it}
       - server.port=8442
       - management.server.port=18442
     deploy:
