@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.2-SNAPSHOT] Added index on `key_material_share_nonce` table
+
+Features:
+* Added index on `key_material_share_nonce` table columns to increase query performance
+
 ## [0.4.1-SNAPSHOT] Support for JWT tokens signed with Mobile-ID (ES256)
 
 Features:
