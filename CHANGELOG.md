@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.2] Version update (2025-02-27)
+
+### Maven package versions:
+```
+cdoc2-shares-server-pom 0.2.0
+cdoc2-shares-server 0.4.2
+cdoc2-css-db 0.1.2
+cdoc2-css-openapi 0.1.1
+```
+
 ## [0.4.2-SNAPSHOT] Added index on `key_material_share_nonce` table
 
 Features:

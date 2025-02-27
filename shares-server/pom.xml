@@ -11,7 +11,7 @@
 
 	<groupId>ee.cyber.cdoc2</groupId>
 	<artifactId>cdoc2-shares-server</artifactId>
-	<version>0.4.2-SNAPSHOT</version>
+	<version>0.4.2</version>
 	<packaging>jar</packaging>
 
 	<name>cdoc2-shares-server</name>
@@ -61,7 +61,7 @@
 				<dependency>
 					<groupId>ee.cyber.cdoc2</groupId>
 					<artifactId>cdoc2-client</artifactId>
-					<version>SID-1.6.1-SNAPSHOT</version>
+					<version>2.0.0</version>
 					<scope>test</scope>
 				</dependency>
         </dependencies>
@@ -187,19 +187,19 @@
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
 			<artifactId>cdoc2-auth-token</artifactId>
-			<version>0.3.3-SNAPSHOT</version>
+			<version>0.3.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
 			<artifactId>cdoc2-css-openapi</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
 			<artifactId>cdoc2-css-db</artifactId>
-			<version>0.1.2-SNAPSHOT</version>
+			<version>0.1.2</version>
 		</dependency>
 
 
