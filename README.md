@@ -104,11 +104,11 @@ Location: /key-shares/ee368ad654142dda1d9d8e00744df2c8
 
 For more info see [admin-guide.md](admin-guide.md) and other existing configurations:
 
-* [cdoc2-java-ref-impl/test/config/shares-server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/blob/SID/test/config/shares-server/docker-compose.yml) _TODO: update branch SID->master after release_
-* [cdoc2-gatling-tests/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/) _TODO: update links_
+* [cdoc2-java-ref-impl/test/config/shares-server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/test/config/shares-server/docker-compose.yml)
+* [cdoc2-gatling-tests/cdoc2-shares-server/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/tree/master/cdoc2-shares-server/setup-load-testing)
 
 For end-to-end tests see
-[cdoc2-java-ref-impl/test/bats/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/tree/SID/test#running-smart-idmobile-id-tests-experimental) _TODO: update branch SID->master_
+[cdoc2-java-ref-impl/test/bats/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/tree/master/test#running-smart-idmobile-id-tests-experimental)
 
 ### GitHub release
 

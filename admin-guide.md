@@ -25,8 +25,8 @@ docker run -v /path/to/config/application.properties:/app/config/application.pro
 Sample `application.properties` files are in [shares-server/config](shares-server/config)
 
 For full sample setups using `docker compose` and `docker run` see:
-* [cdoc2-gatling-tests/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/) for `docker run` examples (TODO: update links)
-* [cdoc2-java-ref-impl/test/config/shares-server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/tree/SID/test/config/shares-server) for `docker compose` example ((TODO: update links))
+* [cdoc2-gatling-tests/cdoc2-shares-server/setup-load-testing](https://github.com/open-eid/cdoc2-gatling-tests/tree/master/cdoc2-shares-server) for `docker run`
+* [cdoc2-java-ref-impl/test/config/shares-server/docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/tree/v2.0.0/test/config/shares-server) for `docker compose` example
 
 
 ## Database

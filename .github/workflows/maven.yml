@@ -66,12 +66,11 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        # temporary dislable tests as SID version of cdoc2-client is not available from GH
         run: |
           echo "Debug env vars: is_fork=$IS_FORK base_repo=$BASE_REPO MAVEN_REPO=$MAVEN_REPO"
           mvn help:active-profiles
           echo "Using Maven repo=$(mvn help:evaluate -Dexpression=github_ci.maven_repo -q -DforceStdout)"
-          mvn -B verify -Dmaven.test.skip=true
+          mvn -B verify
         env:
           GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
           IS_FORK: ${{needs.fork_setup.outputs.is_fork}}

@@ -4,7 +4,7 @@ This file describes how to run `cdoc2-shares-server` in your local development m
 external infrastructure.
 
 If you just interested how
-to run `cdoc2-shares-server` locally, then see [docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/tree/SID/test/config/shares-server)
+to run `cdoc2-shares-server` locally, then see [docker-compose.yml](https://github.com/open-eid/cdoc2-java-ref-impl/tree/master/test/config/shares-server)
 in [cdoc2-java-ref-impl](https://github.com/open-eid/cdoc2-java-ref-impl) repo.
 
 ### Installing and creating PostgreSQL DB in Docker
@@ -83,9 +83,8 @@ that are not trivial task to create.
 
 ### cdoc2-shares-server additional testing
 
-Check out [cdoc2-java-ref-impl/cdoc2-cli/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/SID/cdoc2-cli/README.md)
-for further manual testing (Smart-ID/Mobile-ID) (TODO: replace with new link to `master` branch 
-after release)
+Check out [cdoc2-java-ref-impl/cdoc2-cli/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/blob/master/cdoc2-cli/README.md)
+for further manual testing (Smart-ID/Mobile-ID)
 
-Alternatively run `cdoc2-shares-server` functional tests from [cdoc2-gatling-tests](https://github.com/open-eid/cdoc2-gatling-tests)
+Alternatively run `cdoc2-shares-server` functional tests from [cdoc2-gatling-tests](https://github.com/open-eid/cdoc2-gatling-tests/tree/master/cdoc2-shares-server)
 and/or Smart-ID/Mobile-ID tests from [cdoc2-java-ref-impl/test/bats](https://github.com/open-eid/cdoc2-java-ref-impl/test)

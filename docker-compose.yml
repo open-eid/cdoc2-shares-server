@@ -1,5 +1,4 @@
 # May not be up to date, see
-# https://github.com/open-eid/cdoc2-java-ref-impl/tree/SID/test/config/shares-server
 # https://github.com/open-eid/cdoc2-java-ref-impl/tree/master/test/config/shares-server
 services:
   cdoc2-shares-postgres:
