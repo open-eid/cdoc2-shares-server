@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.DbConnectionConfigProperties;
 import ee.cyber.cdoc2.server.config.MonitoringConfigProperties;
+import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 
 
 @SpringBootApplication
@@ -27,7 +28,8 @@ import ee.cyber.cdoc2.server.config.MonitoringConfigProperties;
 @EnableConfigurationProperties({
     MonitoringConfigProperties.class,
     DbConnectionConfigProperties.class,
-    AuthCertificateConfigProperties.class
+    AuthCertificateConfigProperties.class,
+    NonceConfigProperties.class
 })
 @EnableScheduling
 public class Cdoc2KeySharesServerApplication implements CommandLineRunner {
