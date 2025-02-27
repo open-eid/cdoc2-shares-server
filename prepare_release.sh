@@ -51,17 +51,16 @@ fi
 
 
 #clean up local maven repo
-#mvn dependency:purge-local-repository -Dexclude=ee.cyber.cdoc2:cdoc2-lib,ee.cyber
-.cdoc2:cdoc2-key-shares-openapi -Dinclude=ee.cyber.cdoc2:shares-server,ee.cyber.cdoc2:cdoc2-server-db -DresolutionFuzziness=artifactId
+#mvn dependency:purge-local-repository -Dinclude=ee.cyber.cdoc2:cdoc2-auth-token,ee.cyber.cdoc2:cdoc2-css-openapi,ee.cyber.cdoc2:cdoc2-shares-server,ee.cyber.cdoc2:cdoc2-css-db -DresolutionFuzziness=artifactId
 
 #https://github.com/amoschov/maven-dependency-plugin/blob/master/src/site/apt/examples/purging-local-repository.apt.vm
 # mvn -P 'github,!gitlab.ext' dependency:purge-local-repository -DactTransitively=false -DreResolve=false -DmanualInclude=ee.cyber.cdoc2.openapi:cdoc2-key-shares-openapi -Dverbose=true
-# mvn -P 'github,!gitlab.ext' dependency:purge-local-repository -DmanualInclude=ee.cyber.cdoc2.openapi:cdoc2-key-shares-openapi
+# mvn -P 'github,!gitlab.ext' dependency:purge-local-repository -DmanualInclude=ee.cyber.cdoc2.openapi:cdoc2-css-openapi
 
 # replace module -SNAPSHOT version with release version (non-SNAPSHOT)
-mvn -f cdoc2-shared-crypto versions:set -DremoveSnapshot
+mvn -f cdoc2-shares-server versions:set -DremoveSnapshot
 # build and install into local maven package repository
-mvn -f cdoc2-shared-crypto install
+mvn -f cdoc2-shares-server install
 
 # update version for cdoc2-openapi module
 # versions are not updated for cdoc2-key-shares-openapi OpenApi specifications
@@ -74,6 +73,7 @@ mvn versions:set -DremoveSnapshot
 
 mvn -f server-openapi versions:set -DremoveSnapshot
 mvn -f server-db versions:set -DremoveSnapshot
+mvn -f shares-server versions:set -DremoveSnapshot
 
 # replace ee.cyber.cdoc2:* dependency versions with latest release version (includes packages from local maven repo)
 mvn versions:use-latest-versions -Dincludes=ee.cyber.cdoc2:* -DexcludeReactor=false -DallowSnapshots=false -DallowDowngrade=true
