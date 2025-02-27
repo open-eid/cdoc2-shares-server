@@ -1,6 +1,10 @@
 # Changelog
 
-## [0.4.2] Version update (2025-02-27)
+## [0.4.2] Bug fix for config property initialization (2025-02-27)
+
+### Internal
+
+* Bug fix for config property initialization inside `KeyShareApiService` and unit tests.
 
 ### Maven package versions:
 ```
