@@ -31,7 +31,6 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
+import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApi;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApiController;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApiDelegate;
@@ -65,6 +65,8 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
     private final AuthCertificateConfigProperties certificateConfig;
 
+    private final NonceConfigProperties nonceConfigProperties;
+
     private final NativeWebRequest nativeWebRequest;
 
     private final KeyShareRepository keyShareRepository;
@@ -74,9 +76,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     // configure sslBundles in application.properties
     // https://docs.spring.io/spring-boot/reference/features/ssl.html#features.ssl.pem
     private final SslBundles sslBundles;
-
-    @Value("${cdoc2.nonce.expiration.seconds:300}")
-    private long nonceExpirationSeconds;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -353,11 +352,12 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
         if (dbNonceOpt.isPresent()) {
             KeyShareNonceDb dbNonce = dbNonceOpt.get();
-            long nonceAgeSeconds = Instant.now().getEpochSecond() - dbNonce.getCreatedAt().getEpochSecond();
-            if (nonceAgeSeconds > this.nonceExpirationSeconds) {
-                log.debug("nonce {} is expired. now({})-nonce.createdAt({})={} > {}", ticketNonce, Instant.now(),
-                    dbNonce.getCreatedAt(), nonceAgeSeconds,
-                    this.nonceExpirationSeconds);
+            long nonceExpirationSeconds = nonceConfigProperties.expirationSeconds();
+            Instant now = Instant.now();
+            long nonceAgeSeconds = now.getEpochSecond() - dbNonce.getCreatedAt().getEpochSecond();
+            if (nonceAgeSeconds > nonceExpirationSeconds) {
+                log.debug("nonce {} is expired. now({})-nonce.createdAt({})={} > {}", ticketNonce,
+                    now, dbNonce.getCreatedAt(), nonceAgeSeconds, nonceExpirationSeconds);
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
         } else {
