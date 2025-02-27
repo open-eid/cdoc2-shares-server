@@ -16,16 +16,16 @@ cdoc2-css-openapi 0.1.1
 
 ## [0.4.2-SNAPSHOT] Added index on `key_material_share_nonce` table
 
-Features:
+### Improvements:
 * Added index on `key_material_share_nonce` table columns to increase query performance
 
 ## [0.4.1-SNAPSHOT] Support for JWT tokens signed with Mobile-ID (ES256)
 
-Features:
+### Features:
 * Use [cdoc2-auth-token:0.3.3-SNAPSHOT](https://github.com/open-eid/cdoc2-auth) that adds support 
   for ES256 (Mobile-ID)
 
-Improvements:
+### Improvements:
 * Certificates updates + added script that downloads and creates truststore
 * Spring Boot 3.3.3 -> 3.4.1 + other dependency updates
 * Tag `cdoc2-shares-server-liquibase` with `latest` when built using `build-image.sh` script  
