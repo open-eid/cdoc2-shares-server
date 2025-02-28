@@ -8,7 +8,6 @@
 # mvn deploy
 # docker deploy
 
-#export GIT_REMOTE=gitlab.ext
 CDOC2_SERVER_VER=$(mvn -f server help:evaluate -Dexpression=project.version -q -DforceStdout)
 
 GIT_BRANCH=$(git branch --show-current)
