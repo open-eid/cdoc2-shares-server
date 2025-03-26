@@ -8,7 +8,7 @@ and [DigiDoc4-Client](https://github.com/open-eid/DigiDoc4-Client) for CDOC2 enc
 
 ## Structure
 
-  - server              - Implements `/key-shares` API-s. 
+  - shares-server       - Implements `/key-shares` API-s. 
   - server-db           - shared DB code. Liquibase based DB creation
   - server-openapi      - server stub generation from OpenAPI specifications
 
