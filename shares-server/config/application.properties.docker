@@ -89,7 +89,7 @@ management.metrics.distribution.percentiles-histogram.http.server.requests=true
 management.metrics.enable.jdbc=true
 
 # Enable query statistics (Hibernate)
-spring.jpa.properties.hibernate.generate_statistics=true
+#spring.jpa.properties.hibernate.generate_statistics=true
 # Enable percentiles and histogram buckets for repository metrics
 management.metrics.distribution.percentiles.spring.data.repository=0.5,0.95,0.99
 management.metrics.distribution.percentiles-histogram.spring.data.repository=true

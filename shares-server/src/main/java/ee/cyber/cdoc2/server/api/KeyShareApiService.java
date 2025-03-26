@@ -149,10 +149,24 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         String xAuthTicket,
         String xAuthCert
     ) {
+        // openapi generator adds check for @NotNull, but not for isEmpty()
+        // X509CertUtils.parseWithException will return null, when cert is empty string ("")
+        if (xAuthCert == null || xAuthCert.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // empty ("") xAuthTicket will eventually fail with IllegalArgumentException (401) when parsing sd-jwt
+        // Fail here fast and be consistent with empty xAuthCert
+        if (xAuthTicket == null || xAuthTicket.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         // check xAuthTicket
         String ticketRecipient; // "etsi/PNOEE-30303039914"
         try {
+            // parseWithException returns null, when cert is empty string ("")
             X509Certificate cert = X509CertUtils.parseWithException(xAuthCert);
+
             if (certificateConfig.signCertForbidden()) {
                 verifyCertificateUsagePurpose(cert);
             }

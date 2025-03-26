@@ -62,7 +62,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1g
+          memory: 2g
+          cpus: "2.0"
 
   # second instance of shares-server, according to configured key-shares.properties in cdoc2-java-ref-impl repository
   shares-server-second:
@@ -97,7 +98,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1g
+          memory: 2g
+          cpus: "2.0"
+
 
 configs:
   shares-server-props:

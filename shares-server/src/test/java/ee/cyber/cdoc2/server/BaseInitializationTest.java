@@ -44,10 +44,12 @@ abstract class BaseInitializationTest {
 
     @BeforeAll
     public static void startPostgresContainer() {
-        postgresContainer = new PostgreSQLContainer<>("postgres:11.1")
+        postgresContainer = new PostgreSQLContainer<>("postgres:14.17") //Jammy 22.04 default version
             .withDatabaseName("integration-tests-db")
             .withUsername("sa")
-            .withPassword("sa");
+            .withPassword("sa")
+            .withReuse(true); //prevent pulling images repeatedly
+            //  Docker Hub imposes limits on anonymous users (100 pulls per 6 hours)
         postgresContainer.start();
     }
 

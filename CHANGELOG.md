@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.3]  Handle empty "" GET /key-shares header parameters better. (2025-03-26)
+
+### Improvements:
+* Handle empty ("") "x-cdoc2-auth-x5c" and "x-cdoc2-auth-ticket" header parameters better (no long stacktrace in log), return HTTP 400
+* Spring Boot 3.4.1 -> 3.4.3 + other dependency updates
+* Upgrade dependency `ee.cyber.cdoc2.openapi:cdoc2-key-shares-openapi` `1.0.1-draft` -> `1.0.1` (no changes besides version)
+
+### Maven package versions:
+```
+cdoc2-shares-server 0.4.3
+cdoc2-shares-server-pom 0.2.1
+cdoc2-css-db 0.1.3
+cdoc2-css-openapi 0.1.2
+```
+
 ## [0.4.2] Bug fix for config property initialization (2025-02-27)
 
 ### Internal
