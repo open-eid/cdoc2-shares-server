@@ -4,7 +4,7 @@
 
 	<artifactId>cdoc2-shares-server-pom</artifactId>
 	<groupId>ee.cyber.cdoc2</groupId>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 
 	<description>CDOC2 key shares server pom</description>
 
@@ -33,11 +33,8 @@
 		<!-- https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html-->
 		<junit-jupiter.version>5.11.4</junit-jupiter.version>
 		<lombok.version>1.18.36</lombok.version>
-		<logback-classic.version>1.5.16</logback-classic.version>
-		<exec-maven-plugin.version>3.4.10</exec-maven-plugin.version>
-		<spring-boot.version>3.4.1</spring-boot.version>
-		<spring.version>6.2.1</spring.version>
-
+		<logback-classic.version>1.5.18</logback-classic.version>
+		<spring-boot.version>3.4.3</spring-boot.version>
   	</properties>
 
 	<profiles>

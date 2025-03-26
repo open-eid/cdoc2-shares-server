@@ -72,6 +72,43 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     }
 
     @Test
+    void shouldFailWith400WhenGetKeyShareCertParamIsEmpty() throws Exception {
+        KeyShare keyShare = createKeyShare();
+        keyShare.setRecipient(TestData.TEST_ETSI_RECIPIENT);
+
+        String shareId = this.saveKeyShare(keyShare).getShareId();
+        String nonce = client.createNonce(shareId).getNonce();
+        String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
+
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            // null is checked by openapi generated code, but "" resulted NullPointerException, because
+            // jose X509CertUtils.parseWithException("") returns null
+            () -> client.getKeyShare(shareId, xAuthTicket, "")
+        );
+
+        assertBadRequest(ex.getCode());
+    }
+
+    @Test
+    void shouldFailWith400WhenGetKeyShareAuthTicketParamIsEmpty() {
+        KeyShare keyShare = createKeyShare();
+        keyShare.setRecipient(TestData.TEST_ETSI_RECIPIENT);
+
+        String shareId = this.saveKeyShare(keyShare).getShareId();
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            () -> client.getKeyShare(shareId, "", TestData.TEST_CERT_PEM)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), ex.getCode());
+    }
+
+
+
+    @Test
     void shouldFailToGetKeyShareWithNotFound() throws ApiException {
         String shareId = "SHARE_ID_MIN_LENGTH_SHOULD_BE_32";
 

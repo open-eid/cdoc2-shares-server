@@ -5,4 +5,4 @@ mvn versions:use-latest-versions -Dincludes=ee.cyber.cdoc2:* -DexcludeReactor=fa
 
 # put and get server have spring-boot as parent and need to be updated separately
 
-mvn -f server versions:use-latest-versions -Dincludes=ee.cyber.cdoc2:* -DexcludeReactor=false -DallowSnapshots=false
+mvn -f shares-server versions:use-latest-versions -Dincludes=ee.cyber.cdoc2:* -DexcludeReactor=false -DallowSnapshots=false
