@@ -50,7 +50,7 @@ import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import static ee.cyber.cdoc2.server.Utils.getPathAndQueryPart;
+import static ee.cyber.cdoc2.server.Utils.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -206,13 +206,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         return response;
     }
 
-    private static NonceResponse createNonceResponse(byte[] nonce) {
-        var response = new NonceResponse();
-        response.setNonce(base64UrlEnc(nonce));
-
-        return response;
-    }
-
     /**
      * Get URI for getting Key Share resource (Location).
      * @param id Share id example: KC9b7036de0c9fce889850c4bbb1e23482
@@ -226,10 +219,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
                 // xAuthTicket and xAuthCertificate are not part of url as these are header params
             ).getKeyShareByShareId(id, "", "")).toUri()
         );
-    }
-
-    private static String base64UrlEnc(byte[] src) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(src);
     }
 
     /**
