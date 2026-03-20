@@ -2,6 +2,9 @@ package ee.cyber.cdoc2.server;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Base64;
+
+import ee.cyber.cdoc2.server.generated.model.NonceResponse;
 
 
 /**
@@ -25,4 +28,14 @@ public final class Utils {
         }
     }
 
+    public static String base64UrlEnc(byte[] src) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(src);
+    }
+
+    public static NonceResponse createNonceResponse(byte[] nonce) {
+        var response = new NonceResponse();
+        response.setNonce(base64UrlEnc(nonce));
+
+        return response;
+    }
 }

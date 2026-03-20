@@ -28,16 +28,16 @@
 
 		<tests>!(pkcs11 | slow)</tests>
 
-		<spring-boot.version>3.4.3</spring-boot.version>
+		<spring-boot.version>4.0.3</spring-boot.version>
 		<!-- to overwrite sping-boot dependency define property from -->
 		<!-- https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html -->
 		<!-- https://docs.spring.io/spring-boot/maven-plugin/using.html#using.parent-pom -->
 
 
-		<org-testcontainers.version>1.20.6</org-testcontainers.version>
-		<micrometer.version>1.14.5</micrometer.version>
-		<logback-classic.version>1.5.18</logback-classic.version>
-        <logback.version>1.5.18</logback.version>
+		<org-testcontainers.version>1.21.4</org-testcontainers.version>
+		<micrometer.version>1.16.4</micrometer.version>
+		<logback-classic.version>1.5.32</logback-classic.version>
+        <logback.version>1.5.32</logback.version>
 	</properties>
 
 	<profiles>
@@ -255,9 +255,9 @@
 		nested exception is java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException
 		-->
 		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.3.1</version>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.5</version>
 		</dependency>
 
 		<!-- metrics using micrometer -->
@@ -293,13 +293,13 @@
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
-			<version>4.31.1</version>
+			<version>5.0.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.4.1</version>
+			<version>5.6</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -324,7 +324,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.0</version>
 
 				<configuration>
 					<configLocation>../checkstyle.xml</configLocation>
@@ -354,7 +354,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>copy-keys-and-certificates-to-test-resources</id>
@@ -380,7 +380,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>clean</id>
@@ -414,7 +414,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.5.5</version>
 				<configuration>
 					<trimStackTrace>false</trimStackTrace>
 					<groups>${tests}</groups>
@@ -424,7 +424,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.8.14</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -444,7 +444,7 @@
 				<!-- compile tests as a jar for use by server projects -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.2</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<goals>
