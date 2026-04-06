@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0]  Create new `/session_nonce` endpoint (2026-04-xx)
+
+### Features:
+* Create new `/session_nonce` endpoint
+
 ## [0.4.3]  Handle empty "" GET /key-shares header parameters better. (2025-03-26)
 
 ### Improvements:
