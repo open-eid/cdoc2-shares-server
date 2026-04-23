@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApi;
@@ -72,6 +73,8 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     private final KeyShareRepository keyShareRepository;
 
     private final KeyShareNonceRepository shareNonceRepository;
+
+    private final ValidateSessionToken validateSessionToken;
 
     // configure sslBundles in application.properties
     // https://docs.spring.io/spring-boot/reference/features/ssl.html#features.ssl.pem
@@ -112,8 +115,26 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<NonceResponse> createNonce(String shareId, Object body) {
-        log.trace("createNonce(shareId={}, body={})", shareId, body);
+    public ResponseEntity<NonceResponse> createNonce(
+        String shareId,
+        String sessionToken,
+        String signingCertificate,
+        Object body
+    ) {
+        log.trace(
+            "createNonce(shareId={},sessionToken={},signingCertificate={} body={})",
+            shareId,
+            sessionToken,
+            signingCertificate,
+            body
+        );
+
+        try {
+            validateSessionToken.execute(sessionToken, signingCertificate);
+        } catch (VerificationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).build();
+        }
+
         Optional<KeyShareDb> keyShare = this.keyShareRepository.findById(shareId);
         if (keyShare.isEmpty()) {
             log.error("Key share with shareId {} not found", shareId);

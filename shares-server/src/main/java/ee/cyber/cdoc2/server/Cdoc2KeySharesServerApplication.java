@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 
 
 @SpringBootApplication
+@ConfigurationPropertiesScan
 @Configuration
 @EnableJpaAuditing
 @Slf4j
