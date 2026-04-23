@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import com.nimbusds.jose.util.X509CertUtils;
 import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
+import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
@@ -53,6 +54,9 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
 
     @Mock
     private HttpServletRequest mockHttpServletRequest;
+
+    @Mock
+    private ValidateSessionToken mockValidateSessionToken;
 
     @Autowired
     private SslBundles sslBundles; // initialized from application.properties
@@ -137,6 +141,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
             mockNativeWebRequest,
             mockShareRep,
             mockNonceRep,
+            mockValidateSessionToken,
             sslBundles
         );
     }
@@ -164,7 +169,11 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
         when(mockNonceRep.findByShareIdAndNonce(eq(SHARE_ID), any())).thenReturn(Optional.of(nonceDb));
 
         String pemCertNoLineBreaks = X509CertUtils.toPEMString(X509CertUtils.parse(sidCertStr), false);
-        var resp = keyShareApiService.getKeyShareByShareId(SHARE_ID, AUTH_TICKET, pemCertNoLineBreaks);
+        var resp = keyShareApiService.getKeyShareByShareId(
+            SHARE_ID,
+            AUTH_TICKET,
+            pemCertNoLineBreaks
+        );
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());
         assertTrue(resp.hasBody());

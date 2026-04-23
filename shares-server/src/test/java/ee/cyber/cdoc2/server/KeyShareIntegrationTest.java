@@ -31,6 +31,7 @@ public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
     public void prepareDatabaseState() {
         this.shareNonceRepository.deleteAll();
         this.shareRepository.deleteAll();
+        this.sessionNonceRepository.deleteAll();
     }
 
     @Test

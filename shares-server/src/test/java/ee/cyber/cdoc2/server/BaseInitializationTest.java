@@ -2,6 +2,7 @@ package ee.cyber.cdoc2.server;
 
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
+import ee.cyber.cdoc2.server.model.repository.SessionNonceRepository;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -73,12 +74,16 @@ abstract class BaseInitializationTest {
     @Autowired
     protected KeyShareNonceRepository shareNonceRepository;
 
+    @Autowired
+    protected SessionNonceRepository sessionNonceRepository;
+
     @Test
     void contextLoads() {
         // tests that server is configured properly (no exceptions means success)
         // In case configuration errors, spring fails run-time during initialization
         assertNotNull(shareRepository);
         assertNotNull(shareNonceRepository);
+        assertNotNull(sessionNonceRepository);
         assertTrue(postgresContainer.isRunning());
     }
 

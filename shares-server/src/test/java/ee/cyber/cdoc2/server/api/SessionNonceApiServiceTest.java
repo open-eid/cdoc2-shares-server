@@ -30,7 +30,7 @@ public class SessionNonceApiServiceTest extends SessionNonceIntegrationTest {
 
     @Test
     void shouldGetSessionNonce() {
-        var resp = sessionNonceApiService.generateSessionNonce((Object) null);
+        var resp = sessionNonceApiService.generateSessionNonce(null);
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());
         assertNotNull(resp.getBody());
@@ -40,7 +40,6 @@ public class SessionNonceApiServiceTest extends SessionNonceIntegrationTest {
         assertTrue(sessionNonce.length() >= EXPECTED_SESSION_NONCE_BYTES);
 
         byte[] decodedNonce = Base64.getUrlDecoder().decode(sessionNonce);
-        var nonceFromDb = sessionNonceRepository.findByNonce(decodedNonce);
-         assertTrue(nonceFromDb.isPresent());
+         assertTrue(sessionNonceRepository.existsByNonce(decodedNonce));
     }
 }
