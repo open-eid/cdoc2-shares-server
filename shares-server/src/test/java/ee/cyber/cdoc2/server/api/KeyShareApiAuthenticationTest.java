@@ -172,7 +172,10 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
         var resp = keyShareApiService.getKeyShareByShareId(
             SHARE_ID,
             AUTH_TICKET,
-            pemCertNoLineBreaks
+            pemCertNoLineBreaks,
+            "", // TODO: Add session token
+            "", // TODO: Add signing certificate
+            "" // TODO: Add sidRpv3SignatureParameters
         );
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());

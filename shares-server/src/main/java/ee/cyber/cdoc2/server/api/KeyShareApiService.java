@@ -157,18 +157,14 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
     }
 
-    /**
-     * Get key share by shareId
-     * @param shareId requested shareId
-     * @param xAuthTicket SD-JWT authticket
-     * @param xAuthCert <code>xAuthTicket</code> signer certificate in PEM format.
-     * @return response with capsule or with error status
-     */
     @Override
     public ResponseEntity<KeyShare> getKeyShareByShareId(
         String shareId,
         String xAuthTicket,
-        String xAuthCert
+        String xAuthCert,
+        String sessionToken,
+        String signingCertificate,
+        String sidRpv3SignatureParameters
     ) {
         // openapi generator adds check for @NotNull, but not for isEmpty()
         // X509CertUtils.parseWithException will return null, when cert is empty string ("")
@@ -238,7 +234,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             linkTo(methodOn(
                 KeySharesApiController.class
                 // xAuthTicket and xAuthCertificate are not part of url as these are header params
-            ).getKeyShareByShareId(id, "", "")).toUri()
+            ).getKeyShareByShareId(id, "", "", "", "", "")).toUri()
         );
     }
 
