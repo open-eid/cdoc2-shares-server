@@ -1,11 +1,5 @@
 package ee.cyber.cdoc2.server.api;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.util.X509CertUtils;
-import ee.cyber.cdoc2.auth.AuthTokenVerifier;
-import ee.cyber.cdoc2.auth.exception.IllegalCertificateException;
-import ee.cyber.cdoc2.auth.ShareAccessData;
-import ee.cyber.cdoc2.auth.exception.VerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +30,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.util.X509CertUtils;
+
+import ee.cyber.cdoc2.auth.AuthTokenVerifier;
+import ee.cyber.cdoc2.auth.ShareAccessData;
+import ee.cyber.cdoc2.auth.exception.IllegalCertificateException;
+import ee.cyber.cdoc2.auth.exception.VerificationException;
+import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApi;
@@ -48,9 +51,9 @@ import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
-import org.springframework.web.server.ResponseStatusException;
 
-import static ee.cyber.cdoc2.server.Utils.*;
+import static ee.cyber.cdoc2.server.Utils.createNonceResponse;
+import static ee.cyber.cdoc2.server.Utils.getPathAndQueryPart;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -72,6 +75,8 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     private final KeyShareRepository keyShareRepository;
 
     private final KeyShareNonceRepository shareNonceRepository;
+
+    private final ValidateSessionToken validateSessionToken;
 
     // configure sslBundles in application.properties
     // https://docs.spring.io/spring-boot/reference/features/ssl.html#features.ssl.pem
@@ -112,8 +117,26 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<NonceResponse> createNonce(String shareId, Object body) {
-        log.trace("createNonce(shareId={}, body={})", shareId, body);
+    public ResponseEntity<NonceResponse> createNonce(
+        String shareId,
+        String sessionToken,
+        String signingCertificate,
+        Object body
+    ) {
+        log.trace(
+            "createNonce(shareId={},sessionToken={},signingCertificate={} body={})",
+            shareId,
+            sessionToken,
+            signingCertificate,
+            body
+        );
+
+        try {
+            validateSessionToken.execute(sessionToken, signingCertificate);
+        } catch (VerificationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+        }
+
         Optional<KeyShareDb> keyShare = this.keyShareRepository.findById(shareId);
         if (keyShare.isEmpty()) {
             log.error("Key share with shareId {} not found", shareId);
@@ -136,18 +159,14 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
     }
 
-    /**
-     * Get key share by shareId
-     * @param shareId requested shareId
-     * @param xAuthTicket SD-JWT authticket
-     * @param xAuthCert <code>xAuthTicket</code> signer certificate in PEM format.
-     * @return response with capsule or with error status
-     */
     @Override
     public ResponseEntity<KeyShare> getKeyShareByShareId(
         String shareId,
         String xAuthTicket,
-        String xAuthCert
+        String xAuthCert,
+        String sessionToken,
+        String signingCertificate,
+        String sidRpv3SignatureParameters
     ) {
         // openapi generator adds check for @NotNull, but not for isEmpty()
         // X509CertUtils.parseWithException will return null, when cert is empty string ("")
@@ -159,6 +178,12 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         // Fail here fast and be consistent with empty xAuthCert
         if (xAuthTicket == null || xAuthTicket.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            validateSessionToken.execute(sessionToken, signingCertificate);
+        } catch (VerificationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
         // check xAuthTicket
@@ -217,7 +242,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             linkTo(methodOn(
                 KeySharesApiController.class
                 // xAuthTicket and xAuthCertificate are not part of url as these are header params
-            ).getKeyShareByShareId(id, "", "")).toUri()
+            ).getKeyShareByShareId(id, "", "", "", "", "")).toUri()
         );
     }
 
