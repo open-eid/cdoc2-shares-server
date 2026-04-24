@@ -1,11 +1,5 @@
 package ee.cyber.cdoc2.server.api;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.util.X509CertUtils;
-import ee.cyber.cdoc2.auth.AuthTokenVerifier;
-import ee.cyber.cdoc2.auth.exception.IllegalCertificateException;
-import ee.cyber.cdoc2.auth.ShareAccessData;
-import ee.cyber.cdoc2.auth.exception.VerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +30,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.util.X509CertUtils;
+
+import ee.cyber.cdoc2.auth.AuthTokenVerifier;
+import ee.cyber.cdoc2.auth.ShareAccessData;
+import ee.cyber.cdoc2.auth.exception.IllegalCertificateException;
+import ee.cyber.cdoc2.auth.exception.VerificationException;
 import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
@@ -49,9 +51,9 @@ import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
-import org.springframework.web.server.ResponseStatusException;
 
-import static ee.cyber.cdoc2.server.Utils.*;
+import static ee.cyber.cdoc2.server.Utils.createNonceResponse;
+import static ee.cyber.cdoc2.server.Utils.getPathAndQueryPart;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -132,7 +134,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         try {
             validateSessionToken.execute(sessionToken, signingCertificate);
         } catch (VerificationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
         Optional<KeyShareDb> keyShare = this.keyShareRepository.findById(shareId);
@@ -176,6 +178,12 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         // Fail here fast and be consistent with empty xAuthCert
         if (xAuthTicket == null || xAuthTicket.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            validateSessionToken.execute(sessionToken, signingCertificate);
+        } catch (VerificationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
         // check xAuthTicket

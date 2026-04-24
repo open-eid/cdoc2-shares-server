@@ -104,7 +104,12 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         ).getNonce();
         String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
 
-        Optional<KeyShare> response = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM);
+        Optional<KeyShare> response = client.getKeyShare(shareId, xAuthTicket,
+            TestData.TEST_CERT_PEM,
+            SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+            SID_SIGNING_CERTIFICATE_BASE64URL,
+            null
+        );
 
 
         assertTrue(response.isPresent());
@@ -121,7 +126,11 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
 
         ApiException ex = assertThrows(
             ApiException.class,
-            () -> client.getKeyShare(shareId, xAuthTicket, xAuthCert)
+            () -> client.getKeyShare(shareId, xAuthTicket, xAuthCert,
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL,
+                null
+            )
         );
 
         assertBadRequest(ex.getCode());
@@ -145,7 +154,11 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             ApiException.class,
             // null is checked by openapi generated code, but "" resulted NullPointerException, because
             // jose X509CertUtils.parseWithException("") returns null
-            () -> client.getKeyShare(shareId, xAuthTicket, "")
+            () -> client.getKeyShare(shareId, xAuthTicket, "",
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL,
+                null
+            )
         );
 
         assertBadRequest(ex.getCode());
@@ -160,7 +173,11 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
 
         ApiException ex = assertThrows(
             ApiException.class,
-            () -> client.getKeyShare(shareId, "", TestData.TEST_CERT_PEM)
+            () -> client.getKeyShare(shareId, "", TestData.TEST_CERT_PEM,
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL,
+                null
+            )
         );
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), ex.getCode());
@@ -175,7 +192,10 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         String nonce = "random";
         String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
 
-        Optional<KeyShare> keyShare = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM);
+        Optional<KeyShare> keyShare = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM,
+            SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+            SID_SIGNING_CERTIFICATE_BASE64URL,
+            null);
 
         assertTrue(keyShare.isEmpty());
     }
