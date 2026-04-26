@@ -2,15 +2,10 @@ package ee.cyber.cdoc2.server.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import com.nimbusds.jose.util.X509CertUtils;
-import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
-import ee.cyber.cdoc2.server.ValidateSessionToken;
-import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
-import ee.cyber.cdoc2.server.config.NonceConfigProperties;
-import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
-import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
-import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
-import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
+import java.time.Instant;
+import java.util.HexFormat;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,16 +14,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ssl.SslBundles;
-
 import org.springframework.web.context.request.NativeWebRequest;
 
-import java.time.Instant;
-import java.util.HexFormat;
-import java.util.Optional;
+import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
+import ee.cyber.cdoc2.server.ValidateSessionToken;
+import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
+import ee.cyber.cdoc2.server.config.NonceConfigProperties;
+import ee.cyber.cdoc2.server.config.RpServerConfigProperties;
+import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
+import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
+import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
+import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -38,10 +36,27 @@ import static org.mockito.Mockito.when;
 class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
 
     private static final byte[] SHARE = new byte[128];
-    private static final String SID_DEMO_IDENTIFIER = "30303039914";
+    private static final String SID_DEMO_IDENTIFIER = "40504040001";
     private static final String ETSI_RECIPIENT = "etsi/PNOEE-" + SID_DEMO_IDENTIFIER;
     private static final String SHARE_ID = "ff0102030405060708090a0b0c0e0dff";
     private static final byte[] NONCE_BYTES = HexFormat.of().parseHex("000102030405060708090a0b0c0e0dff");
+
+    private static final String SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL =
+        "Session token validation mocked";
+    private static final String SESSION_TOKEN_SIGNING_CERTIFICATE_BASE64URL =
+        "Session token certificate validation mocked";
+
+    // pre-generated using cdoc2-java-ref-impl AuthTokenCreatorTest::testCreateAuthToken test
+    // generated with SID demo env
+    @SuppressWarnings("checkstyle:LineLength")
+    private static final String AUTH_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL =
+        "eyJ0eXAiOiJ2bmQuY2RvYzIuYXV0aC10b2tlbi52MStzZC1qd3QiLCJhbGciOiJSU0FTU0EtUFNTK0FDU1BfVjIifQ.eyJpc3MiOiJldHNpL1BOT0VFLTQwNTA0MDQwMDAxIiwiX3NkIjpbInhiN244cURmRmNYYjB0aUg4WldNaTlyM0pVUmhhX3hkNGdJTVRMVWp2SFUiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.CMp6BaBsuVYPgmHi9aNWWQEXy4A6bHDacCigV7OQvO8obNuldfV8slpchp_ytwMtZ-pb5KbdvBNGMS4kF2LQXf68Vl8RRCFIMRCovU7LaBIVRhU6YW0XPFPRGD2UBmxKUnWKpGR3Tolf1wtZZ_Zi5ThmnHCAEbaKrIqYqNMFKCqTRrC0fUwWR0MVEDdQ_3vXtlboiT1QM3N-k5YCvTvjWBnY7CSqaeIYXHvH3Jq2pKMZAOtmYB3a8tPGvegw7KcQdBGKoMkEG3FQjshxDLRurMKPlhVlmBs6FQVF-eZZDxm9ichH1ycg3jzKZDivoYqmQd59hoLbNR6eGSrIt58-sdLVVbGPJX1mUem2QioZ3x24PnsSSrsusQCrlcca8QJA0VrDPFg6U0aq60GShdFLt2Avhz1xXCun0EBmMPoGs37vGVyfP-r7KqKFbxTDZ6Nb3hGjll3B9UvkdmIa_nBOZQv-Azzcnj9rGeI_qGzspsHSCu9Cz3LbA-q1_kEEJlm4c-8kbbvrujc1lZLXY6rZDnymRgfKjSNCK1TJAqQvKsFtWADmBVkg9uOiu_F_dmjZ6pPzFhQ_IvAxEahgbz_3wRPSFs2iauV31-duShO5eJydEItRrx4srAGtrSAyiUnn1ZdK22f5RBvjpKCBqXCHzKrf0tNSFqRR1s7-Vcerktv4d_bXMwRYuyMMEAbH075ETOFQ6eP0Bpdl7ne3_esH2T6Mga4l8niRpzDYxt987vP95rVUAEc3TmjPmGzp1jTERUaoYnFqFeX6nrJyaTOED0PBi72VmAdpgXIfZ2CxJrb_PytoATUDMiBc27hYDmwFox9WfovE5MU7VMfjjqXcUVrZD7IlAeYsHnU46y_kcXsEITgK_Kz--P3fvKYd8PoNPiWyN2jg-w4fa6fuU7hWbYNTNA4qW_CFHcMJou9T_9vpfEOMJ9xWi7YcUzu-39vFHi1FNQ1V2QP5Uqrq2lhBJ6xQTah-McNBOw1gWsl1U2JFci358My05X4yGAxheG6C~WyJJX21LbHJRZ19RMWVTNmw4bUJHSDNRIiwiYXVkIixbeyIuLi4iOiJDbTVpRzFTT0wyZTdvcUhqejdnOVBSTW5IMVNlQzl4dGpQVDJOeVFwdENJIn0seyIuLi4iOiI1TWNpZjRGUHVaNWhLdDFrTnRJbExtNmtIVk1iZEV1MzZsZFVnWTRRU19rIn1dXQ~WyJfYnNfSHFVc0szanNBak5xYUNLTFFnIiwiaHR0cHM6Ly9sb2NhbGhvc3Q6ODQ0My9rZXktc2hhcmVzL2ZmMDEwMjAzMDQwNTA2MDcwODA5MGEwYjBjMGUwZGZmP25vbmNlPU1ESSJd~";
+    @SuppressWarnings("checkstyle:LineLength")
+    private static final String SIGNATURE_VALIDATION_PARAMS_BASE64URL =
+        "eyJpbnRlcmFjdGlvbnNEaWdlc3QiOiI0QTNRS0Rxam1xQXR4Rmo2U2lZNWtiVHBMYURZN3BQRnAzb0RBNXFBYy84PSIsImludGVyYWN0aW9uVHlwZVVzZWQiOiJjb25maXJtYXRpb25NZXNzYWdlQW5kVmVyaWZpY2F0aW9uQ29kZUNob2ljZSIsInNpZ25hdHVyZSI6eyJzZXJ2ZXJSYW5kb20iOiJBcmRTanNUTlFnYkRNNFdza2ttWUFJU1UiLCJ1c2VyQ2hhbGxlbmdlIjoiRmI0VGtKUmZTbDdoaGZBSElpc0lZaVhzWDFRTjhyVEg4RHdoTnNKeC1hZyIsInNpZ25hdHVyZUFsZ29yaXRobSI6InJzYXNzYS1wc3MiLCJmbG93VHlwZSI6Ik5vdGlmaWNhdGlvbiIsInNpZ25hdHVyZUFsZ29yaXRobVBhcmFtZXRlcnMiOnsiaGFzaEFsZ29yaXRobSI6IlNIQS0yNTYiLCJtYXNrR2VuQWxnb3JpdGhtIjp7ImFsZ29yaXRobSI6ImlkLW1nZjEiLCJwYXJhbWV0ZXJzIjp7Imhhc2hBbGdvcml0aG0iOiJTSEEtMjU2In19LCJzYWx0TGVuZ3RoIjozMiwidHJhaWxlckZpZWxkIjoiMHhiYyJ9fX0=";
+    @SuppressWarnings("checkstyle:LineLength")
+    private static final String AUTH_TOKEN_SIGNING_CERTIFICATE_BASE64URL =
+        "MIIGpzCCBi6gAwIBAgIQGcJUbe6JHI6jJyV-42vjnTAKBggqhkjOPQQDAzBxMSwwKgYDVQQDDCNURVNUIG9mIFNLIElEIFNvbHV0aW9ucyBFSUQtUSAyMDI0RTEXMBUGA1UEYQwOTlRSRUUtMTA3NDcwMTMxGzAZBgNVBAoMElNLIElEIFNvbHV0aW9ucyBBUzELMAkGA1UEBhMCRUUwHhcNMjYwMTA2MTQyNTAxWhcNMjkwMTA1MTQyNTAwWjBXMQswCQYDVQQGEwJFRTEQMA4GA1UEAwwHVEVTVCxPSzENMAsGA1UEBAwEVEVTVDELMAkGA1UEKgwCT0sxGjAYBgNVBAUTEVBOT0VFLTQwNTA0MDQwMDAxMIIDIjANBgkqhkiG9w0BAQEFAAOCAw8AMIIDCgKCAwEAkI98VzyaeSueyaUQYIXMMf-1VY10Gw-b8Q13Rb9N62ROZY97wMIB__f8_PuOIoqkAPM6Tn_t4lp1R_rHrbuqs0hl2dgLlOcR5wmWmp7YfKPDvRndVLl_doIHruxY8O60rFGskSnqt4coHN4xGcmCyPkJoB8Rfm8-Y9poVKAreS0Ta32p5OSME0HjSs7-ahB2erWfb2GulFw1vyeH42d3XDpCCfd6CByvSsi4oByUqs5G-kjSrGUglflgWXK3MxBYto0swgsbD1nrW5doU_cMCfRoFURun4XguX8dTt9VeyqeJitxRfub2Hj18RbsKuoFNHQNOxAxRK4oTVCtUrYbVqBHDmoOm8r3CsSuqjuZ2njQybiUhBofpTVMCZ6lB6VgoLphmEwSEOQXIumpmpb2qJZqbZaBoyyWb4f5AQjw3Q5lwPSao5215hIgSuuENRezpP9rTzIwyOMbnV2nMSMInAuaXIXskB2NdpMsROsvOqBC0h5azTj9naCS-5EW-9eI7GGK03Du5JoKD5wYajJxfcxFwBAl8Ko71OvhGFtYiu-hqzz-CyG6NswB87KvzDYUCQ-0qOfgRBNCgYnbjnuYVJb3CGLp_cP5GmKtUC3wHX1WnPGyK4bD19Rcy-FhG6mD_ZrAPcmZ3s4FLLErpRJ3ui-fiMPLQl2bpCKTWoaEZoPg6Grnhr3bE2ZiKWmqdVwf30bG3-GnvTBTuF0T1lzt6NeBlB23SJsffCmzSFSNcFJHHYI1FYdZu2p0gL6KAabEmnE8GrTrCn93DFNBtoKu9vG30QrRzyh-itPvtn9w-9t-nDkhaVHmNCjWD1xcMeXsyK8ek0rbz5aVe_RPvCifhIpgjqNsDHh9q1QT9KIFsd6RD2XPMlekL9c6YiVY9H7uRyIQWqJwtrvNvBKj4ZT9745zTfkhCJTPvnLy-4iKeINVZ2f98BblsGAEHKGol8YA-3SRkPh9BVnVhSdI3lxCDEbmHuk21GIPE9689efSvbcDEHpqeYoxo3tXjl_hqfzPAgMBAAGjggH1MIIB8TAJBgNVHRMEAjAAMB8GA1UdIwQYMBaAFLAkFxmI42b4zShYZXtNFNiSZk9rMHAGCCsGAQUFBwEBBGQwYjAzBggrBgEFBQcwAoYnaHR0cDovL2Muc2suZWUvVEVTVF9FSUQtUV8yMDI0RS5kZXIuY3J0MCsGCCsGAQUFBzABhh9odHRwOi8vYWlhLmRlbW8uc2suZWUvZWlkcTIwMjRlMDAGA1UdEQQpMCekJTAjMSEwHwYDVQQDDBhQTk9FRS00MDUwNDA0MDAwMS1ERU0wLVEweAYDVR0gBHEwbzBjBgkrBgEEAc4fEQIwVjBUBggrBgEFBQcCARZIaHR0cHM6Ly93d3cuc2tpZHNvbHV0aW9ucy5ldS9yZXNvdXJjZXMvY2VydGlmaWNhdGlvbi1wcmFjdGljZS1zdGF0ZW1lbnQvMAgGBgQAj3oBAjAoBgNVHQkEITAfMB0GCCsGAQUFBwkBMREYDzE5MDUwNDA0MTIwMDAwWjAWBgNVHSUEDzANBgsrBgEEAYPmYgUHADA0BgNVHR8ELTArMCmgJ6AlhiNodHRwOi8vYy5zay5lZS90ZXN0X2VpZC1xXzIwMjRlLmNybDAdBgNVHQ4EFgQUX9YaVGlPdUOO2J6rzNc4sljBQBAwDgYDVR0PAQH_BAQDAgeAMAoGCCqGSM49BAMDA2cAMGQCMHhYJCeKceJv_m0xcFRssS4WVFnnCryDiuSEpjDZu0irJ_XurXXIFDr-9hhl2x7GMwIwbiD5GALRtwzUaEh-SV9jigT9Oc336f6QYf8YaSA0-Un8eRQPa9wTK0cSQrM_CUIu";
 
     @Mock
     private KeyShareRepository mockShareRep;
@@ -63,69 +78,6 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
 
     private KeyShareApiService keyShareApiService;
 
-    // pre-generated using cdoc2-java-ref-impl AuthTokenCreatorTest::testCreateAuthToken test
-    // generated with SID demo env
-    private static final String AUTH_TICKET = """
-        eyJ0eXAiOiJ2bmQuY2RvYzIuYXV0aC10b2tlbi52MStzZC1qd3QiLCJhbGciOiJSUzI1NiJ9
-        .
-        eyJpc3MiOiJldHNpL1BOT0VFLTMwMzAzMDM5OTE0IiwiX3NkIjpbIlZQYmtIX3ZUTGh3WEcxYWZYMXUtTTljU21HZnZNZnR4b0NDNzlpMTJSUG8
-        iXSwiX3NkX2FsZyI6InNoYS0yNTYifQ
-        .
-        II2r_TcyfZoO0zu_ltN4Gd-FYvcP-dzRuiGHOVdMVgBzYLws2nyuYrtQcthETce4EvgE6-r-TaFtSfZj7BcLvQwMX84xEwbHIDUmIxl2GMYK1u4
-        4HpK9N1QnNDTssvrMm3isyRL65dSm9siUGLZVa4sTHpR7CoUjGfpGg8NfGQjoYjdGIEsd4MuCfTKJGqFCh-W5emLf7T08RPCphcUemq028C7ZrB
-        B7-7Z8QP4XKC-yBprru9diwibALAjeuyo5lHa7vs5tu_glWs895wpIze8CYhmPadbAijOFrCP7r-KRV6V7wpl5l1DU9bXEJT5QQWdOUWJq02VYC
-        xORFmL1y6hy4ZiTFi9JoD389WWQksy8JmZKT7sFkNHt5lSuCsZEl-LoxpAxnQ0udMlx1tvZ4NMOqEruCyw0GJ8DHBWQx5fLGbkOriy2-QltBmms
-        HUKXHIVYubwWOgHbcp8HMCBakaWxxzMXJA_Xjo5FhNAVQ2fLPhXejq3t4e_SWc-We04QdptepP2CnMNn_YIzcdausPdmu3LOcYKPe3bT5wTmnr8
-        lv_Xk0eLADHKjhRQRdNQeHXcNPJ1zgAZbPOsldgXgu__uKgMwG3lrfUI9HBJ9H1XbG_nUZsFEKT-5_pct_soSWgDV8HauhkWV1qCGBqrHR_NrqF
-        S9wi-dAzEnPihUyaXhFNjpQuI2srsGU4CMXooAjqh7UJxO8hEZezkvN4SWZ62MigIfa9-7msV5pdrv5AvqEyDmW7syddqvdXoWGXRi3GsX9WXYL
-        pop_CUOa2O1ZIva9yzIHTA_RAoE7fUB9hsyq4ibaeLy25czuaRG8Ziv8GWR9DFf90Hvx1Cdg7qoa6FpqjJrLW3A5kVdaW-ebG1sb2T2Fk0kVibg
-        7TAajHKZ2GXO0kK8OJT-L9EC3703kdB4qQpw3Dcqwe5Nptoyqhl9PkbKqja-LeDMbvwvflT5X-vbGhiydmM3cLmjBti0XsBAHm2NGZpg4arJ11x
-        w5156FFrSOZvDA6oCIKYUpqcV
-        ~
-        WyJzOTVWZ3ZWRGFSY09qM0hXa2I3YlhRIiwiYXVkIixbeyIuLi4iOiJCbEtoRnJSZlVjM3hLRlFmU2xZUzQyaWxsbXVoS2YzZUNKa2EyYXNfRlR
-        vIn0seyIuLi4iOiJtellSVk9lTmROZl9uXzB3ZVdSYTg3NUtZYnRINTFRVEowWUtHRm1acUZNIn1dXQ
-        ~
-        WyJYU2ZPUkpYdGZuTXk1aUZ2bFZMaGd3IiwiaHR0cHM6Ly9sb2NhbGhvc3Q6ODQ0My9rZXktc2hhcmVzL2ZmMDEwMjAzMDQwNTA2MDcwODA5MGE
-        wYjBjMGUwZGZmP25vbmNlXHUwMDNkQUFFQ0F3UUZCZ2NJQ1FvTERBNE5fdyJd
-        ~
-        """.replaceAll("\\s", ""); //remove all whitespace
-
-    // SID demo env cert for 30303039914 that automatically authenticates successfully
-    private final String sidCertStr = """
-        -----BEGIN CERTIFICATE-----
-        MIIIIjCCBgqgAwIBAgIQUJQ/xtShZhZmgogesEbsGzANBgkqhkiG9w0BAQsFADBoMQswCQYDVQQGEwJFRTEiMCAGA1UECgwZ
-        QVMgU2VydGlmaXRzZWVyaW1pc2tlc2t1czEXMBUGA1UEYQwOTlRSRUUtMTA3NDcwMTMxHDAaBgNVBAMME1RFU1Qgb2YgRUlE
-        LVNLIDIwMTYwIBcNMjQwNzAxMTA0MjM4WhgPMjAzMDEyMTcyMzU5NTlaMGMxCzAJBgNVBAYTAkVFMRYwFAYDVQQDDA1URVNU
-        TlVNQkVSLE9LMRMwEQYDVQQEDApURVNUTlVNQkVSMQswCQYDVQQqDAJPSzEaMBgGA1UEBRMRUE5PRUUtMzAzMDMwMzk5MTQw
-        ggMiMA0GCSqGSIb3DQEBAQUAA4IDDwAwggMKAoIDAQCo+o1jtKxkNWHvVBRA8Bmh08dSJxhL/Kzmn7WS2u6vyozbF6M3f1lp
-        XZXqXqittSmiz72UVj02jtGeu9Hajt8tzR6B4D+DwWuLCvTawqc+FSjFQiEB+wHIb4DrKF4t42Aazy5mlrEy+yMGBe0ygMLd
-        6GJmkFw1pzINq8vu6sEY25u6YCPnBLhRRT3LhGgJCqWQvdsN3XCV8aBwDK6IVox4MhIWgKgDF/dh9XW60MMiW8VYwWC7ONa
-        3LTqXJRuUhjFxmD29Qqj81k8ZGWn79QJzTWzlh4NoDQT8w+8ZIOnyNBAxQ+Ay7iFR4SngQYUyHBWQspHKpG0dhKtzh3zELIk
-        o8sxnBZ9HNkwnIYe/CvJIlqARpSUHY/Cxo8X5upwrfkhBUmPuDDgS14ci4sFBiW2YbzzWWtxbEwiRkdqmA1NxoTJybA9Frj6
-        NIjC4Zkk+tL/N8Xdblfn8kBKs+cAjk4ssQPQruSesyvzs4EGNgAk9PX2oeelGTt02AZiVkIpUha8VgDrRUNYyFZc3E3Z3Ph1
-        aOCEQMMPDATaRps3iHw/waHIpziHzFAncnUXQDUMLr6tiq+mOlxYCi8+NEzrwT2GOixSIuvZK5HzcJTBYz35+ESLGjxnUjb
-        ssfra9RAvyaeE1EDfAOrJNtBHPWP4GxcayCcCuVBK2zuzydhY6Kt8ukXh5MIM08GRGHqj8gbBMOW6zEb3OVNSfyi1xF8MYAT
-        KnM1XjSYN49My0BPkJ01xCwFzC2HGXUTyb8ksmHtrC8+MrGLus3M3mKFvKA9VatSeQZ8ILR6WeA54A+GMQeJuV54ZHZtD208
-        5Vj7R+IjR+3jakXBvZhVoSTLT7TIIa0U6L46jUIHee/mbf5RJxesZzkP5zA81csYyLlzzNzFah1ff7MxDBi0v/UyJ9ngFCeL
-        t7HewtlC8+HRbgSdk+57KgaFIgVFKhv34Hz1Wfh3ze1Rld3r1Dx6so4h4CZOHnUN+hprosI4t1y8jorCBF2GUDbIqmBCx7Dg
-        qT6aE5UcMcXd8CAwEAAaOCAckwggHFMAkGA1UdEwQCMAAwDgYDVR0PAQH/BAQDAgSwMHkGA1UdIARyMHAwZAYKKwYBBAHOHw
-        MRAjBWMFQGCCsGAQUFBwIBFkhodHRwczovL3d3dy5za2lkc29sdXRpb25zLmV1L3Jlc291cmNlcy9jZXJ0aWZpY2F0aW9uLX
-        ByYWN0aWNlLXN0YXRlbWVudC8wCAYGBACPegECMB0GA1UdDgQWBBQUFyCLUawSl3KCp22kZI88UhtHvTAfBgNVHSMEGDAWgB
-        SusOrhNvgmq6XMC2ZV/jodAr8StDATBgNVHSUEDDAKBggrBgEFBQcDAjB8BggrBgEFBQcBAQRwMG4wKQYIKwYBBQUHMAGGHW
-        h0dHA6Ly9haWEuZGVtby5zay5lZS9laWQyMDE2MEEGCCsGAQUFBzAChjVodHRwOi8vc2suZWUvdXBsb2FkL2ZpbGVzL1RFU1
-        Rfb2ZfRUlELVNLXzIwMTYuZGVyLmNydDAwBgNVHREEKTAnpCUwIzEhMB8GA1UEAwwYUE5PRUUtMzAzMDMwMzk5MTQtTU9DSy
-        1RMCgGA1UdCQQhMB8wHQYIKwYBBQUHCQExERgPMTkwMzAzMDMxMjAwMDBaMA0GCSqGSIb3DQEBCwUAA4ICAQCqlSMpTx+/n
-        wfI5eEislq9rce9eOY/9uA0b3Pi7cn6h7jdFes1HIlFDSUjA4DxiSWSMD0XX1MXe7J7xx/AlhwFI1WKKq3eLx4wE8sjOaacH
-        nwV/JSTf6iSYjAB4MRT2iJmvopgpWHS6cAQfbG7qHE19qsTvG7Ndw7pW2uhsqzeV5/hcCf10xxnGOMYYBtU7TheKRQtkeBiP
-        Jsv4HuIFVV0pGBnrvpqj56Q+TBD9/8bAwtmEMScQUVDduXPc+uIJJoZfLlUdUwIIfhhMEjSRGnaK4H0laaFHa05+KkFtHzc/
-        iYEGwJQbiKvUn35/liWbcJ7nr8uCQSuV4PHMjZ2BEVtZ6Qj58L/wSSidb4qNkSb9BtlK+wwNDjbqysJtQCAKP7SSNuYcEAWl
-        mvtHmpHlS3tVb7xjko/a7zqiakjCXE5gIFUmtZJFbG5dO/0VkT5zdrBZJoq+4DkvYSVGVDE/AtKC86YZ6d1DY2jIT0c9Blb
-        Fp40A4Xkjjjf5/BsRlWFAs8Ip0Y/evG68gQBATJ2g3vAbPwxvNX2x3tKGNg+aDBYMGM76rRrtLhRqPIE4Ygv8x/s7JoBxy1q
-        Czuwu/KmB7puXf/y/BBdcwRHIiBq2XQTfEW3ZJJ0J5+Kq48keAT4uOWoJiPLVTHwUP/UBhwOSa4nSOTAfdBXG4NqMknYwvAE
-        9g==
-        -----END CERTIFICATE-----
-        """;
-
     @Test
     void contextLoads() {
         // tests that test is configured properly (no exceptions means success)
@@ -137,6 +89,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     public void setUp() {
         keyShareApiService = new KeyShareApiService(
             new AuthCertificateConfigProperties(),
+            new RpServerConfigProperties(),
             new NonceConfigProperties(),
             mockNativeWebRequest,
             mockShareRep,
@@ -149,9 +102,9 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     @Test
     void shouldAuthenticateAndGetKeyShare() {
         KeyShareDb keyShareDb = new KeyShareDb()
-                .setShareId(SHARE_ID)
-                .setShare(SHARE)
-                .setRecipient(ETSI_RECIPIENT);
+            .setShareId(SHARE_ID)
+            .setShare(SHARE)
+            .setRecipient(ETSI_RECIPIENT);
 
         KeyShareNonceDb nonceDb = new KeyShareNonceDb()
             .setShareId(SHARE_ID)
@@ -168,14 +121,13 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
         when(mockShareRep.findById(SHARE_ID)).thenReturn(Optional.of(keyShareDb));
         when(mockNonceRep.findByShareIdAndNonce(eq(SHARE_ID), any())).thenReturn(Optional.of(nonceDb));
 
-        String pemCertNoLineBreaks = X509CertUtils.toPEMString(X509CertUtils.parse(sidCertStr), false);
         var resp = keyShareApiService.getKeyShareByShareId(
             SHARE_ID,
-            AUTH_TICKET,
-            pemCertNoLineBreaks,
-            "", // TODO: Add session token
-            "", // TODO: Add signing certificate
-            "" // TODO: Add sidRpv3SignatureParameters
+            AUTH_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+            AUTH_TOKEN_SIGNING_CERTIFICATE_BASE64URL,
+            SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+            SESSION_TOKEN_SIGNING_CERTIFICATE_BASE64URL,
+            SIGNATURE_VALIDATION_PARAMS_BASE64URL
         );
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());
