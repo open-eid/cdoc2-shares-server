@@ -111,20 +111,20 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     @Override
     public ResponseEntity<NonceResponse> createNonce(
         String shareId,
-        String sessionToken,
-        String signingCertificate,
+        String xSessionToken,
+        String xSessionCert,
         Object body
     ) {
         log.trace(
-            "createNonce(shareId={},sessionToken={},signingCertificate={} body={})",
+            "createNonce(shareId={},xSessionToken={},xSessionCert={} body={})",
             shareId,
-            sessionToken,
-            signingCertificate,
+            xSessionToken,
+            xSessionCert,
             body
         );
 
         try {
-            validateSessionToken.execute(sessionToken, signingCertificate);
+            validateSessionToken.execute(xSessionToken, xSessionCert);
         } catch (VerificationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
@@ -156,9 +156,9 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         String shareId,
         String xAuthToken,
         String xAuthCert,
-        String sessionToken,
-        String sessionCertificate,
-        String sidRpv3SignatureParameters
+        String xSessionToken,
+        String xSessionCert,
+        String xSidRpv3SignatureParameters
     ) {
         // openapi generator adds check for @NotNull, but not for isEmpty()
         // X509CertUtils.parseWithException will return null, when cert is empty string ("")
@@ -173,7 +173,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
 
         try {
-            validateSessionToken.execute(sessionToken, sessionCertificate);
+            validateSessionToken.execute(xSessionToken, xSessionCert);
         } catch (VerificationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
@@ -191,7 +191,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             tokenRecipient = validateAuthToken(
                 shareId,
                 xAuthToken,
-                sidRpv3SignatureParameters,
+                xSidRpv3SignatureParameters,
                 xAuthCert
             );
         } catch (CertificateException | VerificationException ex) {
