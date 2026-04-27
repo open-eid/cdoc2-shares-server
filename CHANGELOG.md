@@ -1,9 +1,17 @@
 # Changelog
 
-## [0.5.0]  Create new `/session_nonce` endpoint (2026-04-xx)
+## [0.5.0]  SID/MID authentication/security improvements
 
 ### Features:
 * Create new `/session_nonce` endpoint
+* Use [cdoc2-auth-token:0.5.0-SNAPSHOT]
+* Auth token verification accepts SID RPv3 token signatures
+* header `x-cdoc2-auth-ticket` renamed to `x-cdoc2-auth-token`
+* header `x-cdoc2-auth-x5c` changed to expect a Base64Url-encoded DER certificate
+* new headers `x-cdoc2-session-token`, `x-cdoc2-session-x5c` applied to endpoints 
+ `GET /key-shares/{shareId}`, `POST /key-shares/{shareId}/nonce`
+* new header `x-cdoc2-sid-rpv3-signature-parameters` applied to endpoint `/key-shares/{shareId}`.
+  Used when `x-cdoc2-auth-token` is signed with SID RPv3
 
 ## [0.4.3]  Handle empty "" GET /key-shares header parameters better. (2025-03-26)
 
