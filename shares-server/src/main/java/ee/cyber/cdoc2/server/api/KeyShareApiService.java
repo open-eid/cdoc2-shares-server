@@ -31,7 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.nimbusds.jose.util.X509CertUtils;
 
-import ee.cyber.cdoc2.auth.AuthTokenVerifierV2;
+import ee.cyber.cdoc2.auth.AuthTokenVerifier;
 import ee.cyber.cdoc2.auth.ShareAccessData;
 import ee.cyber.cdoc2.auth.TokenVerificationResponse;
 import ee.cyber.cdoc2.auth.exception.VerificationException;
@@ -268,10 +268,10 @@ public class KeyShareApiService implements KeySharesApiDelegate {
      * If all checks are positive, then the authentication and access control decision is successful and CSS server can
      * return the capsule.
      *
-     * @param shareId     requested shareId (will be compared to shareId in xAuthToken)
+     * @param shareId    requested shareId (will be compared to shareId in xAuthToken)
      * @param xAuthToken SD-JWT auth token that was generated for requested <code>shareId</code>
-     * @param cert        X.509 certificate. Certificate subject/SERIALNUMBER must match
-     *                    <code>xAuthToken</code> body "iss" without "etsi/" prefix.
+     * @param cert       X.509 certificate. Certificate subject/SERIALNUMBER must match
+     *                   <code>xAuthToken</code> body "iss" without "etsi/" prefix.
      * @return "iss" of SD-JWT, represents authToken issuer identify. Example "etsi/PNOEE-30303039914"
      * @throws VerificationException   if xAuthToken validation fails
      * @throws ResponseStatusException status 404, when shareId or nonce is not found from DB or nonce is expired
@@ -284,7 +284,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     ) throws VerificationException {
         KeyStore sidTrustedIssuers = sslBundles.getBundle("sid-trusted-issuers").getStores().getTrustStore();
 
-        AuthTokenVerifierV2 tokenVerifier = new AuthTokenVerifierV2(
+        AuthTokenVerifier tokenVerifier = new AuthTokenVerifier(
             sidTrustedIssuers,
             certificateConfig.revocationChecksEnabled()
         );
