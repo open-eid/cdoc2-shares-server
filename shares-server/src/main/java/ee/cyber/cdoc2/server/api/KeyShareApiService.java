@@ -123,21 +123,33 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             body
         );
 
+        TokenVerificationResponse verificationResponse;
         try {
-            validateSessionToken.execute(xSessionToken, xSessionCert);
+            verificationResponse = validateSessionToken.execute(xSessionToken, xSessionCert);
         } catch (VerificationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        Optional<KeyShareDb> keyShare = this.keyShareRepository.findById(shareId);
-        if (keyShare.isEmpty()) {
+        Optional<KeyShareDb> keyShareOptional = this.keyShareRepository.findById(shareId);
+
+        if (keyShareOptional.isEmpty()) {
             log.error("Key share with shareId {} not found", shareId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        KeyShareDb keyShare = keyShareOptional.get();
+
+        String sessionTokenSubject = verificationResponse.identifier().toString();
+
+        if (!keyShare.getRecipient().equals(verificationResponse.identifier().toString())) {
+            log.warn("Key share with shareId {} and recipient {} doesn't match "
+                    + "session token subject {}",
+                shareId, keyShare.getRecipient(), sessionTokenSubject);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         try {
             var saved = this.shareNonceRepository.save(
-                new KeyShareNonceDb().setShareId(keyShare.get().getShareId())
+                new KeyShareNonceDb().setShareId(keyShare.getShareId())
             );
 
             log.info("KeyShareNonce(shareId = {}, nonce = {}) created", shareId, saved.getNonce());
