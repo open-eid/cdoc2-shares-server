@@ -86,7 +86,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     @Disabled
     void shouldGetKeyShare() throws Exception {
         KeyShare keyShare = createKeyShare();
-        keyShare.setRecipient(TEST_ETSI_RECIPIENT);
+        keyShare.setRecipient(SHARE_RECIPIENT);
 
         String shareId = this.saveKeyShare(keyShare).getShareId();
         String nonce = client.createNonce(
@@ -131,7 +131,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     @Test
     void shouldFailWith400WhenGetKeyShareCertParamIsEmpty() throws Exception {
         KeyShare keyShare = createKeyShare();
-        keyShare.setRecipient(TEST_ETSI_RECIPIENT);
+        keyShare.setRecipient(SHARE_RECIPIENT);
 
         String shareId = this.saveKeyShare(keyShare).getShareId();
         String nonce = client.createNonce(
@@ -158,7 +158,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     @Test
     void shouldFailWith400WhenGetKeyShareAuthTicketParamIsEmpty() {
         KeyShare keyShare = createKeyShare();
-        keyShare.setRecipient(TEST_ETSI_RECIPIENT);
+        keyShare.setRecipient(SHARE_RECIPIENT);
 
         String shareId = this.saveKeyShare(keyShare).getShareId();
 
