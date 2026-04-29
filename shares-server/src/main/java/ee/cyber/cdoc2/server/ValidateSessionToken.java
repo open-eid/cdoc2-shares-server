@@ -29,7 +29,7 @@ public class ValidateSessionToken {
     private final SessionNonceRepository sessionNonceRepository;
     private final Clock clock;
 
-    public void execute(
+    public TokenVerificationResponse execute(
         String sessionToken,
         String signingCertificate
     ) throws VerificationException {
@@ -54,5 +54,7 @@ public class ValidateSessionToken {
         if (!sessionNonceRepository.existsByNonce(decodedNonce)) {
             throw new VerificationException("Could not find session nonce");
         }
+
+        return response;
     }
 }

@@ -19,6 +19,7 @@ import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.DbConnectionConfigProperties;
 import ee.cyber.cdoc2.server.config.MonitoringConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
+import ee.cyber.cdoc2.server.config.RpServerConfigProperties;
 
 
 @SpringBootApplication
@@ -31,7 +32,8 @@ import ee.cyber.cdoc2.server.config.NonceConfigProperties;
     MonitoringConfigProperties.class,
     DbConnectionConfigProperties.class,
     AuthCertificateConfigProperties.class,
-    NonceConfigProperties.class
+    NonceConfigProperties.class,
+    RpServerConfigProperties.class
 })
 @EnableScheduling
 public class Cdoc2KeySharesServerApplication implements CommandLineRunner {
