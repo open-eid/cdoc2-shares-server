@@ -85,6 +85,8 @@ services:
         target: /config/cdoc2server.p12
       - source: sid-trusted-issuers-truststore
         target: /config/sid_trusted_issuers.jks
+      - source: cdoc2-trusted-infra
+        target: /config/cdoc2_infra_truststore.jks
     environment:
       - SPRING_CONFIG_ADDITIONAL_LOCATION=optional:file:/config/application.properties
       - POSTGRES_URL=${POSTGRES_URL}
@@ -111,3 +113,5 @@ configs:
     file: ./keys/cdoc2server.p12
   sid-trusted-issuers-truststore:
       file: ./shares-server/src/test/resources/sid-trusted-issuers/test_sid_trusted_issuers.jks
+  cdoc2-trusted-infra:
+    file: ./keys/cdoc2_infra_truststore.jks
