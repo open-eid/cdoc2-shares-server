@@ -45,7 +45,7 @@ abstract class BaseInitializationTest {
     public static void startPostgresContainer() {
         //TODO This is a workaround for
         // https://github.com/testcontainers/testcontainers-java/issues/11212
-        // proper would probably upgrading to Testcontainers 2
+        // proper solution would probably be upgrading to Testcontainers 2
         System.setProperty("api.version", "1.44");
 
         postgresContainer = new PostgreSQLContainer<>("postgres:14.17") //Jammy 22.04 default version
