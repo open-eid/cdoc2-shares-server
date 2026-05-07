@@ -2,6 +2,9 @@
 # --build-arg LIQUIBASE_IMAGE=custom.registry.io:8500/liquibase/liquibase
 ARG LIQUIBASE_IMAGE=docker.io/liquibase/liquibase:4.29.2
 FROM $LIQUIBASE_IMAGE
+
+ADD postgresql-42.7.10.jar /liquibase/lib/
+
 USER liquibase
 WORKDIR /liquibase/changelog
 
