@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.0]  SID/MID authentication/security improvements
+
+### Features:
+* Create job for expired session nonce removal
+
 ## [0.5.0]  SID/MID authentication/security improvements
 
 ### Features:
