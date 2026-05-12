@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
 
     @Autowired
-    private ExpiredShareNonceCleanUpJob cleanUpJob;
+    private ExpiredNonceCleanUpJob cleanUpJob;
 
     @BeforeEach
     public void prepareDatabaseState() {
