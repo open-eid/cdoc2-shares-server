@@ -339,10 +339,14 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             URL reqURL = extractRequestURL(this.nativeWebRequest);
             URL tokenBaseURL = new URL(shareAccessData.getServerBaseUrl());
 
+            int tokenPort = tokenBaseURL.getPort() == -1
+                ? tokenBaseURL.getDefaultPort()
+                : tokenBaseURL.getPort();
+
             // check protocol, host and port
             if ((tokenBaseURL.getHost() == null) || !tokenBaseURL.getHost().equals(reqURL.getHost())
                 || tokenBaseURL.getProtocol() == null || !tokenBaseURL.getProtocol().equals(reqURL.getProtocol())
-                || tokenBaseURL.getPort() != reqURL.getPort()
+                || tokenPort != reqURL.getPort()
             ) {
                 throw new VerificationException("protocol, host or port in token and request don't match ("
                     + shareAccessData.getServerBaseUrl() + "!="
