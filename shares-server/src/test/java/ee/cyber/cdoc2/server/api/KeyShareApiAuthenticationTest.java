@@ -2,6 +2,8 @@ package ee.cyber.cdoc2.server.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -10,22 +12,34 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+
 import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
+import ee.cyber.cdoc2.server.ValidateAuthToken;
 import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerConfigProperties;
+import ee.cyber.cdoc2.server.config.RpServerJwkConf;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,6 +54,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     private static final String ETSI_RECIPIENT = "etsi/PNOEE-" + SID_DEMO_IDENTIFIER;
     private static final String SHARE_ID = "ff0102030405060708090a0b0c0e0dff";
     private static final byte[] NONCE_BYTES = HexFormat.of().parseHex("000102030405060708090a0b0c0e0dff");
+    private static final int WIREMOCK_PORT = 9090;
 
     private static final String SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL =
         "Session token validation mocked";
@@ -58,6 +73,13 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     private static final String AUTH_TOKEN_SIGNING_CERTIFICATE_BASE64URL =
         "MIIGpzCCBi6gAwIBAgIQGcJUbe6JHI6jJyV-42vjnTAKBggqhkjOPQQDAzBxMSwwKgYDVQQDDCNURVNUIG9mIFNLIElEIFNvbHV0aW9ucyBFSUQtUSAyMDI0RTEXMBUGA1UEYQwOTlRSRUUtMTA3NDcwMTMxGzAZBgNVBAoMElNLIElEIFNvbHV0aW9ucyBBUzELMAkGA1UEBhMCRUUwHhcNMjYwMTA2MTQyNTAxWhcNMjkwMTA1MTQyNTAwWjBXMQswCQYDVQQGEwJFRTEQMA4GA1UEAwwHVEVTVCxPSzENMAsGA1UEBAwEVEVTVDELMAkGA1UEKgwCT0sxGjAYBgNVBAUTEVBOT0VFLTQwNTA0MDQwMDAxMIIDIjANBgkqhkiG9w0BAQEFAAOCAw8AMIIDCgKCAwEAkI98VzyaeSueyaUQYIXMMf-1VY10Gw-b8Q13Rb9N62ROZY97wMIB__f8_PuOIoqkAPM6Tn_t4lp1R_rHrbuqs0hl2dgLlOcR5wmWmp7YfKPDvRndVLl_doIHruxY8O60rFGskSnqt4coHN4xGcmCyPkJoB8Rfm8-Y9poVKAreS0Ta32p5OSME0HjSs7-ahB2erWfb2GulFw1vyeH42d3XDpCCfd6CByvSsi4oByUqs5G-kjSrGUglflgWXK3MxBYto0swgsbD1nrW5doU_cMCfRoFURun4XguX8dTt9VeyqeJitxRfub2Hj18RbsKuoFNHQNOxAxRK4oTVCtUrYbVqBHDmoOm8r3CsSuqjuZ2njQybiUhBofpTVMCZ6lB6VgoLphmEwSEOQXIumpmpb2qJZqbZaBoyyWb4f5AQjw3Q5lwPSao5215hIgSuuENRezpP9rTzIwyOMbnV2nMSMInAuaXIXskB2NdpMsROsvOqBC0h5azTj9naCS-5EW-9eI7GGK03Du5JoKD5wYajJxfcxFwBAl8Ko71OvhGFtYiu-hqzz-CyG6NswB87KvzDYUCQ-0qOfgRBNCgYnbjnuYVJb3CGLp_cP5GmKtUC3wHX1WnPGyK4bD19Rcy-FhG6mD_ZrAPcmZ3s4FLLErpRJ3ui-fiMPLQl2bpCKTWoaEZoPg6Grnhr3bE2ZiKWmqdVwf30bG3-GnvTBTuF0T1lzt6NeBlB23SJsffCmzSFSNcFJHHYI1FYdZu2p0gL6KAabEmnE8GrTrCn93DFNBtoKu9vG30QrRzyh-itPvtn9w-9t-nDkhaVHmNCjWD1xcMeXsyK8ek0rbz5aVe_RPvCifhIpgjqNsDHh9q1QT9KIFsd6RD2XPMlekL9c6YiVY9H7uRyIQWqJwtrvNvBKj4ZT9745zTfkhCJTPvnLy-4iKeINVZ2f98BblsGAEHKGol8YA-3SRkPh9BVnVhSdI3lxCDEbmHuk21GIPE9689efSvbcDEHpqeYoxo3tXjl_hqfzPAgMBAAGjggH1MIIB8TAJBgNVHRMEAjAAMB8GA1UdIwQYMBaAFLAkFxmI42b4zShYZXtNFNiSZk9rMHAGCCsGAQUFBwEBBGQwYjAzBggrBgEFBQcwAoYnaHR0cDovL2Muc2suZWUvVEVTVF9FSUQtUV8yMDI0RS5kZXIuY3J0MCsGCCsGAQUFBzABhh9odHRwOi8vYWlhLmRlbW8uc2suZWUvZWlkcTIwMjRlMDAGA1UdEQQpMCekJTAjMSEwHwYDVQQDDBhQTk9FRS00MDUwNDA0MDAwMS1ERU0wLVEweAYDVR0gBHEwbzBjBgkrBgEEAc4fEQIwVjBUBggrBgEFBQcCARZIaHR0cHM6Ly93d3cuc2tpZHNvbHV0aW9ucy5ldS9yZXNvdXJjZXMvY2VydGlmaWNhdGlvbi1wcmFjdGljZS1zdGF0ZW1lbnQvMAgGBgQAj3oBAjAoBgNVHQkEITAfMB0GCCsGAQUFBwkBMREYDzE5MDUwNDA0MTIwMDAwWjAWBgNVHSUEDzANBgsrBgEEAYPmYgUHADA0BgNVHR8ELTArMCmgJ6AlhiNodHRwOi8vYy5zay5lZS90ZXN0X2VpZC1xXzIwMjRlLmNybDAdBgNVHQ4EFgQUX9YaVGlPdUOO2J6rzNc4sljBQBAwDgYDVR0PAQH_BAQDAgeAMAoGCCqGSM49BAMDA2cAMGQCMHhYJCeKceJv_m0xcFRssS4WVFnnCryDiuSEpjDZu0irJ_XurXXIFDr-9hhl2x7GMwIwbiD5GALRtwzUaEh-SV9jigT9Oc336f6QYf8YaSA0-Un8eRQPa9wTK0cSQrM_CUIu";
 
+    private static final String CS_RP_SIGNED_HASH = "sj2RtSo7c1tx+J00KWWkzyv4iQ2L2cuX0InnFFi+GAQ=";
+    private static final String CS_RP_NAME = "DEMO";
+    private static final String CS_SIGNATURE_INPUT =
+        "rp-sig=(\"x-rp-signed-hash\" \"x-rp-name\");created=1779011296;keyid=\"rp-server-ec-key-2026\"";
+    private static final String CS_SIGNATURE =
+        "rp-sig=:nt5aITnpc8JjVrOYw8q46bNieq9L7y8gBjw+rJJ7BoY4X3h8BL5PwwcUBzl70iTOvikGCBOmpjbDY1661EqMMA==:";
+
     @Mock
     private KeyShareRepository mockShareRep;
 
@@ -74,9 +96,20 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     private ValidateSessionToken mockValidateSessionToken;
 
     @Autowired
+    private ResourceLoader resourceLoader;
+
+    @Autowired
     private SslBundles sslBundles; // initialized from application.properties
 
+    @Autowired
+    private RpServerJwkConf rpServerJwkConf;
+
     private KeyShareApiService keyShareApiService;
+
+    @RegisterExtension
+    static WireMockExtension wiremock = WireMockExtension.newInstance()
+        .options(wireMockConfig().port(WIREMOCK_PORT))
+        .build();
 
     @Test
     void contextLoads() {
@@ -86,16 +119,32 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         keyShareApiService = new KeyShareApiService(
             new AuthCertificateConfigProperties(),
-            new RpServerConfigProperties(),
-            new NonceConfigProperties(),
             mockNativeWebRequest,
             mockShareRep,
             mockNonceRep,
             mockValidateSessionToken,
-            sslBundles
+            new ValidateAuthToken(
+                sslBundles,
+                new AuthCertificateConfigProperties(),
+                new RpServerConfigProperties(),
+                mockNonceRep,
+                new NonceConfigProperties(),
+                rpServerJwkConf
+            )
+        );
+
+        Resource resource = resourceLoader.getResource("classpath:rp-server-well-known.json");
+        String keysResponseBody = resource.getContentAsString(StandardCharsets.UTF_8);
+
+        wiremock.stubFor(
+            WireMock.get(urlEqualTo("/.well-known/jwks.jws"))
+                .willReturn(aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withBody(keysResponseBody)
+                )
         );
     }
 
@@ -127,7 +176,11 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
             AUTH_TOKEN_SIGNING_CERTIFICATE_BASE64URL,
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SESSION_TOKEN_SIGNING_CERTIFICATE_BASE64URL,
-            SIGNATURE_VALIDATION_PARAMS_BASE64URL
+            SIGNATURE_VALIDATION_PARAMS_BASE64URL,
+            CS_RP_SIGNED_HASH,
+            CS_RP_NAME,
+            CS_SIGNATURE_INPUT,
+            CS_SIGNATURE
         );
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());

@@ -3,9 +3,10 @@
     {
       "kty": "EC",
       "crv": "P-256",
-      "x": "gQT1_Ud-qCJZL-9zm_HBb2v_L1-ermyIo5IohV4Svyw",
-      "y": "Y0DLwH5fHZSxwTN7Ndp7VrEys3yqdMQ_5cfmAYFOeEk",
-      "kid": "ec-key-2026"
+      "x": "SIsDcu6c2CjOEIxZyh4ctZZA-zz4pFYv0duHPlNWinU",
+      "y": "50dC54PpOVtBHBGyzW1S6DgaBts-ywY3KgOclSIV97M",
+      "use": "enc",
+      "kid": "rp-server-ec-key-2026"
     },
     {
       "kty": "RSA",

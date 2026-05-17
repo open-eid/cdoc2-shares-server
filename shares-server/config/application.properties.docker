@@ -102,5 +102,11 @@ endpoints.health.sensitive=false
 management.endpoints.metrics.username=username
 management.endpoints.metrics.password=password
 
+app.restclient.auth-server.hostUri=https://localhost:7500
+app.restclient.rp-server.hostUri=https://localhost:7600
+
 # Expired share nonce removing job executes every 5 minutes every day
 key-share-nonce.expired.clean-up.cron=0 0/5 * * * ?
+
+# Expired session nonce removing job executes every 5 minutes every day
+session-nonce.expired.clean-up.cron=0 0/5 * * * ?
