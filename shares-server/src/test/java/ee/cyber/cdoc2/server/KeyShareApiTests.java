@@ -45,6 +45,10 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         Instant.parse("2026-04-22T12:30:00Z");
     private static final int WIREMOCK_PORT = 8090;
 
+    @SuppressWarnings("checkstyle:LineLength")
+    private static final String SIGNATURE_VALIDATION_PARAMS_BASE64URL =
+        "eyJpbnRlcmFjdGlvbnNEaWdlc3QiOiI0QTNRS0Rxam1xQXR4Rmo2U2lZNWtiVHBMYURZN3BQRnAzb0RBNXFBYy84PSIsImludGVyYWN0aW9uVHlwZVVzZWQiOiJjb25maXJtYXRpb25NZXNzYWdlQW5kVmVyaWZpY2F0aW9uQ29kZUNob2ljZSIsInNpZ25hdHVyZSI6eyJzZXJ2ZXJSYW5kb20iOiJBcmRTanNUTlFnYkRNNFdza2ttWUFJU1UiLCJ1c2VyQ2hhbGxlbmdlIjoiRmI0VGtKUmZTbDdoaGZBSElpc0lZaVhzWDFRTjhyVEg4RHdoTnNKeC1hZyIsInNpZ25hdHVyZUFsZ29yaXRobSI6InJzYXNzYS1wc3MiLCJmbG93VHlwZSI6Ik5vdGlmaWNhdGlvbiIsInNpZ25hdHVyZUFsZ29yaXRobVBhcmFtZXRlcnMiOnsiaGFzaEFsZ29yaXRobSI6IlNIQS0yNTYiLCJtYXNrR2VuQWxnb3JpdGhtIjp7ImFsZ29yaXRobSI6ImlkLW1nZjEiLCJwYXJhbWV0ZXJzIjp7Imhhc2hBbGdvcml0aG0iOiJTSEEtMjU2In19LCJzYWx0TGVuZ3RoIjozMiwidHJhaWxlckZpZWxkIjoiMHhiYyJ9fX0=";
+
     @RegisterExtension
     static WireMockExtension wiremock = WireMockExtension.newInstance()
         .options(wireMockConfig().port(WIREMOCK_PORT))
@@ -100,6 +104,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             TestData.TEST_CERT_PEM,
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL,
+            SIGNATURE_VALIDATION_PARAMS_BASE64URL,
             null
         );
 
@@ -121,6 +126,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             () -> client.getKeyShare(shareId, xAuthTicket, xAuthCert,
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
+                SIGNATURE_VALIDATION_PARAMS_BASE64URL,
                 null
             )
         );
@@ -148,6 +154,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             () -> client.getKeyShare(shareId, "xAuthTicket", "",
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
+                SIGNATURE_VALIDATION_PARAMS_BASE64URL,
                 null
             )
         );
@@ -167,6 +174,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             () -> client.getKeyShare(shareId, "", TestData.TEST_CERT_PEM,
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
+                SIGNATURE_VALIDATION_PARAMS_BASE64URL,
                 null
             )
         );
@@ -188,6 +196,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         Optional<KeyShare> keyShare = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM,
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL,
+            SIGNATURE_VALIDATION_PARAMS_BASE64URL,
             null);
 
         assertTrue(keyShare.isEmpty());
