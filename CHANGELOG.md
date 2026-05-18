@@ -4,6 +4,10 @@
 
 ### Features:
 * Create job for expired session nonce removal
+* RFC9421 HTTP signature validation for /key-share/{shareId} endpoint
+
+### Improvements
+* Upgraded Spring Boot 4.0.3 -> 4.0.6
 
 ## [0.5.0]  SID/MID authentication/security improvements
 
