@@ -96,11 +96,13 @@ public class ValidateAuthToken {
         TokenVerificationResponse verificationResponse = tokenVerifier.verify(
             xAuthToken,
             xAuthCert,
-            new AuthTokenVerifier.SidAuthTokenVerificationParams(
+            sidRpv3SignatureParameters != null
+                ? new AuthTokenVerifier.SidAuthTokenVerificationParams(
                 sidRpv3SignatureParameters,
                 rpServerConfigProperties.rpName(),
                 rpServerConfigProperties.schemeName()
-            ),
+            )
+                : null,
             createParamsForHttpSignatureVerification(httpSignatureParams)
         );
 
