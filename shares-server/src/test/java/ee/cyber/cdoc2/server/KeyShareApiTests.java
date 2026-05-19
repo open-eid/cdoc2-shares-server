@@ -105,9 +105,10 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL,
             SIGNATURE_VALIDATION_PARAMS_BASE64URL,
-            null
+            new Cdoc2KeySharesApiClient.RpCountersignatureParams(
+                null, null, null, null
+            )
         );
-
 
         assertTrue(response.isPresent());
         KeyShare savedKeyShare = response.get();
@@ -127,7 +128,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
                 SIGNATURE_VALIDATION_PARAMS_BASE64URL,
-                null
+                new Cdoc2KeySharesApiClient.RpCountersignatureParams(
+                    null, null, null, null
+                )
             )
         );
 
@@ -155,7 +158,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
                 SIGNATURE_VALIDATION_PARAMS_BASE64URL,
-                null
+                new Cdoc2KeySharesApiClient.RpCountersignatureParams(
+                    null, null, null, null
+                )
             )
         );
 
@@ -175,7 +180,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
                 SIGNATURE_VALIDATION_PARAMS_BASE64URL,
-                null
+                new Cdoc2KeySharesApiClient.RpCountersignatureParams(
+                    null, null, null, null
+                )
             )
         );
 
@@ -197,7 +204,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL,
             SIGNATURE_VALIDATION_PARAMS_BASE64URL,
-            null);
+            new Cdoc2KeySharesApiClient.RpCountersignatureParams(
+                null, null, null, null
+            ));
 
         assertTrue(keyShare.isEmpty());
     }
