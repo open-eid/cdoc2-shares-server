@@ -25,10 +25,12 @@ import org.springframework.web.context.request.NativeWebRequest;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
+import ee.cyber.cdoc2.server.Constants;
 import ee.cyber.cdoc2.server.KeyShareIntegrationTest;
 import ee.cyber.cdoc2.server.ValidateAuthToken;
 import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
+import ee.cyber.cdoc2.server.config.KeyShareExpiryConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerJwkConf;
@@ -122,6 +124,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     public void setUp() throws IOException {
         keyShareApiService = new KeyShareApiService(
             new AuthCertificateConfigProperties(),
+            new KeyShareExpiryConfigProperties(),
             mockNativeWebRequest,
             mockShareRep,
             mockNonceRep,
@@ -153,7 +156,9 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
         KeyShareDb keyShareDb = new KeyShareDb()
             .setShareId(SHARE_ID)
             .setShare(SHARE)
-            .setRecipient(ETSI_RECIPIENT);
+            .setRecipient(ETSI_RECIPIENT)
+            .setExpiryTime(EXPIRY_TIME)
+            .setExpiryTimeAdjusted(EXPIRY_TIME_ADJUSTED);
 
         KeyShareNonceDb nonceDb = new KeyShareNonceDb()
             .setShareId(SHARE_ID)
@@ -185,6 +190,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());
         assertTrue(resp.hasBody());
+        assertTrue(resp.getHeaders().containsKey(Constants.X_EXPIRY_TIME_HEADER));
         assertEquals(ETSI_RECIPIENT, resp.getBody().getRecipient());
         assertArrayEquals(SHARE, resp.getBody().getShare());
     }

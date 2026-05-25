@@ -1,5 +1,18 @@
 # Changelog
 
+## [unreleased]
+
+### Features:
+
+* Added optional `x-expiry-time` header to `POST` `/key-shares` request. If omitted, key share 
+  expiry will be determined by a server-configured default value.
+* Added optional `x-expiry-time`, `x-expiry-time-adjusted` headers to `POST` `/key-shares` 
+  response. `x-expiry-time` in response is the actual applied expiry time, which may differ from 
+  the requested time if the requested time exceeds the servers configured maximum allowable key 
+  share expiration time. If the server adjusted the expiry time, `x-expiry-time-adjusted` will 
+  be set to `true`.
+* Added `x-expiry-time` header to `GET` `/key-shares/{shareId}` response.
+
 ## [0.6.0]  SID/MID authentication/security improvements
 
 ### Features:

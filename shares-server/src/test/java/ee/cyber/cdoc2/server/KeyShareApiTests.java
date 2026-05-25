@@ -347,6 +347,8 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             new KeyShareDb()
                 .setRecipient(dto.getRecipient())
                 .setShare(dto.getShare())
+                .setExpiryTime(EXPIRY_TIME)
+                .setExpiryTimeAdjusted(EXPIRY_TIME_ADJUSTED)
         );
     }
 
