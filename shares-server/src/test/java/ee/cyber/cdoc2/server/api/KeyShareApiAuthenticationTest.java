@@ -157,8 +157,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
             .setShareId(SHARE_ID)
             .setShare(SHARE)
             .setRecipient(ETSI_RECIPIENT)
-            .setExpiryTime(EXPIRY_TIME)
-            .setExpiryTimeAdjusted(EXPIRY_TIME_ADJUSTED);
+            .setExpiryTime(EXPIRY_TIME);
 
         KeyShareNonceDb nonceDb = new KeyShareNonceDb()
             .setShareId(SHARE_ID)

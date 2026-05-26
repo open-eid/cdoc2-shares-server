@@ -92,7 +92,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
                     .setShare(keyShare.getShare())
                     .setRecipient(keyShare.getRecipient())
                     .setExpiryTime(expiryTimeData.xExpiryTime.toInstant())
-                    .setExpiryTimeAdjusted(expiryTimeData.expiryTimeAdjusted)
             );
 
             log.info("KeyShare(shareId={}) created", saved.getShareId());
@@ -101,7 +100,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
             return ResponseEntity.created(created)
                 .header(Constants.X_EXPIRY_TIME_HEADER, DateTimeFormatter.ISO_INSTANT.format(saved.getExpiryTime()))
-                .header(Constants.X_EXPIRY_TIME_ADJUSTED, String.valueOf(saved.getExpiryTimeAdjusted()))
+                .header(Constants.X_EXPIRY_TIME_ADJUSTED, String.valueOf(expiryTimeData.expiryTimeAdjusted))
                 .build();
         } catch (Exception e) {
             log.error(

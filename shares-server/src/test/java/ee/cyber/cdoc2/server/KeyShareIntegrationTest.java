@@ -184,7 +184,6 @@ public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
         byte[] bytes = new byte[128];
         keyShareDb.setShare(bytes);
         keyShareDb.setExpiryTime(EXPIRY_TIME);
-        keyShareDb.setExpiryTimeAdjusted(EXPIRY_TIME_ADJUSTED);
         return createKeyShare(keyShareDb);
     }
 

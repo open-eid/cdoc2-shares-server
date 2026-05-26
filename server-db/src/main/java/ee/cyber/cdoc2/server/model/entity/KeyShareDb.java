@@ -60,8 +60,4 @@ public class KeyShareDb extends AuditEntity {
     @NotNull
     @Column(nullable = false)
     private Instant expiryTime;
-
-    @NotNull
-    @Column(nullable = false)
-    private Boolean expiryTimeAdjusted;
 }
