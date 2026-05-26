@@ -1,5 +1,6 @@
 package ee.cyber.cdoc2.server.api;
 
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,11 @@ import java.net.URL;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -28,9 +34,11 @@ import com.nimbusds.jose.util.X509CertUtils;
 
 import ee.cyber.cdoc2.auth.TokenVerificationResponse;
 import ee.cyber.cdoc2.auth.exception.VerificationException;
+import ee.cyber.cdoc2.server.Constants;
 import ee.cyber.cdoc2.server.ValidateAuthToken;
 import ee.cyber.cdoc2.server.ValidateSessionToken;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
+import ee.cyber.cdoc2.server.config.KeyShareExpiryConfigProperties;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApi;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApiController;
 import ee.cyber.cdoc2.server.generated.api.KeySharesApiDelegate;
@@ -55,6 +63,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequiredArgsConstructor
 public class KeyShareApiService implements KeySharesApiDelegate {
     private final AuthCertificateConfigProperties certificateConfig;
+    private final KeyShareExpiryConfigProperties keyShareExpiryConfig;
     private final NativeWebRequest nativeWebRequest;
     private final KeyShareRepository keyShareRepository;
     private final KeyShareNonceRepository shareNonceRepository;
@@ -67,23 +76,32 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> createKeyShare(KeyShare keyShare) {
+    public ResponseEntity<Void> createKeyShare(
+        KeyShare keyShare,
+        @Nullable LocalDateTime xExpiryTime
+    ) {
         log.trace("createKeyShare(share={} bytes, recipient={} bytes)",
             keyShare.getShare().length, keyShare.getRecipient()
         );
+
+        ExpiryTimeData expiryTimeData = getExpiryTime(xExpiryTime);
 
         try {
             var saved = this.keyShareRepository.save(
                 new KeyShareDb()
                     .setShare(keyShare.getShare())
                     .setRecipient(keyShare.getRecipient())
+                    .setExpiryTime(expiryTimeData.xExpiryTime.toInstant())
             );
 
             log.info("KeyShare(shareId={}) created", saved.getShareId());
 
             URI created = getResourceLocation(saved.getShareId());
 
-            return ResponseEntity.created(created).build();
+            return ResponseEntity.created(created)
+                .header(Constants.X_EXPIRY_TIME_HEADER, DateTimeFormatter.ISO_INSTANT.format(saved.getExpiryTime()))
+                .header(Constants.X_EXPIRY_TIME_ADJUSTED, String.valueOf(expiryTimeData.expiryTimeAdjusted))
+                .build();
         } catch (Exception e) {
             log.error(
                 "Failed to save key share(share={} bytes, recipient={})",
@@ -235,7 +253,45 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return ResponseEntity.ok(createKeyShare(shareDb));
+        return ResponseEntity.ok()
+            .header(
+                Constants.X_EXPIRY_TIME_HEADER,
+                DateTimeFormatter.ISO_INSTANT.format(shareDb.getExpiryTime())
+            )
+            .body(createKeyShare(shareDb));
+    }
+
+    private ExpiryTimeData getExpiryTime(LocalDateTime xExpiryTime) {
+        OffsetDateTime xMaxExpiryTime = getCapsuleExpirationTime(
+            keyShareExpiryConfig.maxExpirationDuration()
+        );
+
+        if (null != xExpiryTime) {
+            if (toOffsetDateTime(xExpiryTime).isAfter(xMaxExpiryTime)) {
+                return new ExpiryTimeData(xMaxExpiryTime, true);
+            }
+
+            return new ExpiryTimeData(toOffsetDateTime(xExpiryTime), false);
+        } else {
+            return new ExpiryTimeData(
+                getCapsuleExpirationTime(keyShareExpiryConfig.defaultExpirationDuration()),
+                false
+            );
+        }
+    }
+
+    private static OffsetDateTime getCapsuleExpirationTime(String duration) {
+        Duration expiryDuration = Duration.parse(duration);
+
+        return OffsetDateTime.now()
+            .toInstant()
+            .atZone(ZoneOffset.UTC)
+            .plus(expiryDuration)
+            .toOffsetDateTime();
+    }
+
+    private OffsetDateTime toOffsetDateTime(LocalDateTime expiryTime) {
+        return OffsetDateTime.of(expiryTime, ZoneOffset.UTC);
     }
 
     private static KeyShare createKeyShare(KeyShareDb share) {
@@ -334,4 +390,9 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
     }
 
+    private record ExpiryTimeData(
+        OffsetDateTime xExpiryTime,
+        boolean expiryTimeAdjusted
+    ) {
+    }
 }

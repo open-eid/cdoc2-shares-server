@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.HexFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,4 +57,7 @@ public class KeyShareDb extends AuditEntity {
     @JdbcTypeCode(SqlTypes.BINARY)
     private byte[] share;
 
+    @NotNull
+    @Column(nullable = false)
+    private Instant expiryTime;
 }

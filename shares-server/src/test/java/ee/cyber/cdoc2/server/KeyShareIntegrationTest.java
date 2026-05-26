@@ -2,9 +2,10 @@ package ee.cyber.cdoc2.server;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HexFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HexFormat;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,18 +15,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @Slf4j
 public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
 
     @Autowired
-    private ExpiredNonceCleanUpJob cleanUpJob;
+    private ExpiredNonceCleanUpJob nonceCleanUpJob;
+
+    @Autowired
+    private ExpiredKeyShareCleanUpJob keyShareCleanUpJob;
 
     @BeforeEach
     public void prepareDatabaseState() {
@@ -93,7 +93,7 @@ public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
 
         assertTrue(retrievedOpt.isPresent());
         String nonceHex = HexFormat.of().formatHex(dbNonceRecord.getNonce());
-        KeyShareNonceDb retrievedNonce =  retrievedOpt.get();
+        KeyShareNonceDb retrievedNonce = retrievedOpt.get();
         log.debug("findByShareIdAndNonce({},{}): {}", shareId, nonceHex, retrievedNonce);
         assertEquals(shareId, retrievedNonce.getShareId());
         assertArrayEquals(dbNonceRecord.getNonce(), retrievedNonce.getNonce());
@@ -118,11 +118,43 @@ public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
         boolean isExpiredByMoreThanOneDay = now.isAfter(creationTime) && creationTime.isBefore(oneDayAgo);
         assertTrue(isExpiredByMoreThanOneDay);
 
-        int deletedShareNonce = cleanUpJob.cleanUpExpiredShareNonce();
+        int deletedShareNonce = nonceCleanUpJob.cleanUpExpiredShareNonce();
         assertEquals(1, deletedShareNonce);
 
         long countRemaining = this.shareNonceRepository.count();
         assertEquals(0, countRemaining);
+    }
+
+    @Test
+    void shouldCleanUpExpiredKeyShares() {
+        KeyShareDb keyShare = defaultKeyShare();
+        KeyShareDb keyShareExpired = defaultKeyShare();
+        Instant expiryTime = Instant.now().minusSeconds(60);
+
+        keyShareExpired.setExpiryTime(expiryTime);
+
+        createKeyShare(keyShare);
+        createKeyShare(keyShareExpired);
+
+        List<KeyShareDb> keySharesBeforeCleanup = shareRepository.findAll();
+        assertEquals(2, keySharesBeforeCleanup.size());
+        assertTrue(keySharesBeforeCleanup.stream()
+            .anyMatch(k -> k.getShareId().equals(keyShare.getShareId()))
+        );
+
+        assertTrue(keySharesBeforeCleanup.stream()
+            .anyMatch(k -> k.getShareId().equals(keyShareExpired.getShareId()))
+        );
+
+        keyShareCleanUpJob.cleanUpExpiredKeyShares();
+
+        List<KeyShareDb> keySharesAfterCleanup = shareRepository.findAll();
+        assertEquals(1, keySharesAfterCleanup.size());
+
+        assertEquals(
+            keySharesAfterCleanup.get(0).getShareId(),
+            keyShare.getShareId()
+        );
     }
 
     @Test
@@ -136,7 +168,7 @@ public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
         nonce.setCreatedAt(desiredCreationTime);
         KeyShareNonceDb updatedNonce = this.shareNonceRepository.save(nonce);
 
-        int deletedShareNonce = cleanUpJob.cleanUpExpiredShareNonce();
+        int deletedShareNonce = nonceCleanUpJob.cleanUpExpiredShareNonce();
         assertEquals(0, deletedShareNonce);
 
         Instant creationTime = updatedNonce.getCreatedAt();
@@ -146,12 +178,21 @@ public abstract class KeyShareIntegrationTest extends BaseInitializationTest {
         assertTrue(isNotExpired);
     }
 
-    private KeyShareDb createKeyShare() {
+    private KeyShareDb defaultKeyShare() {
         KeyShareDb keyShareDb = new KeyShareDb();
         keyShareDb.setRecipient("1234567891011_12_is_min_length");
         byte[] bytes = new byte[128];
         keyShareDb.setShare(bytes);
-        return this.shareRepository.save(keyShareDb);
+        keyShareDb.setExpiryTime(EXPIRY_TIME);
+        return createKeyShare(keyShareDb);
+    }
+
+    private KeyShareDb createKeyShare() {
+        return this.shareRepository.save(defaultKeyShare());
+    }
+
+    private KeyShareDb createKeyShare(KeyShareDb keyShare) {
+        return this.shareRepository.save(keyShare);
     }
 
     private KeyShareNonceDb createKeyShareNonce(String shareId) {

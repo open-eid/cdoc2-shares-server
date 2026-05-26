@@ -3,6 +3,7 @@ package ee.cyber.cdoc2.server;
 import jakarta.validation.ConstraintViolationException;
 
 import java.security.KeyStore;
+import java.time.Instant;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 @ContextConfiguration(initializers = BaseInitializationTest.Initializer.class)
 abstract class BaseInitializationTest {
-
+    protected static final Instant EXPIRY_TIME = Instant.now().plusSeconds(86400);
     protected static final KeyStore CLIENT_TRUST_STORE = TestData.loadKeyStore(
         "JKS",
         TestData.getKeysDirectory().resolve("clienttruststore.jks"),
