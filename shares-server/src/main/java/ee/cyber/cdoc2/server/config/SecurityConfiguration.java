@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                 authorize
                     .requestMatchers(new AntPathRequestMatcher("/key-shares/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/session_nonce")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/info")).permitAll()
                     // authenticated URI must go first
                     .requestMatchers(new AntPathRequestMatcher("/actuator/prometheus")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
