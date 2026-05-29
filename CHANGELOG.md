@@ -12,6 +12,7 @@
   share expiration time. If the server adjusted the expiry time, `x-expiry-time-adjusted` will 
   be set to `true`.
 * Added `x-expiry-time` header to `GET` `/key-shares/{shareId}` response.
+* Added `/info` endpoint.
 
 ## [0.6.0]  SID/MID authentication/security improvements
 
