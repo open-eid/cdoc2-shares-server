@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.1]
+
+### Improvements
+* Use CycloneDX Maven plugin for SBOM creation
+
 ## [0.7.0]
 
 ### Features:
