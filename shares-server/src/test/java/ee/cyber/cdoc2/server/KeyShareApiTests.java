@@ -4,7 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -64,6 +68,12 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
 
     @MockitoBean
     private Clock clock;
+
+    @Autowired
+    private ee.cyber.cdoc2.server.api.KeyShareApiService keyShareApiService;
+
+    @Autowired
+    private ee.cyber.cdoc2.server.config.KeyShareExpiryConfigProperties keyShareExpiryConfig;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -221,6 +231,41 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     }
 
     @Test
+    void shouldCreateKeyShareWithExplicitExpiryTimeWithinMax() {
+        var serverKeyShare = new ee.cyber.cdoc2.server.generated.model.KeyShare();
+        serverKeyShare.setShare(SHARE);
+        serverKeyShare.setRecipient(SHARE_RECIPIENT);
+
+        // half the configured max — guaranteed to be within max regardless of its value
+        Duration maxDuration = Duration.parse(keyShareExpiryConfig.maxExpirationDuration());
+        LocalDateTime expiryTime = LocalDateTime.now().plus(maxDuration.dividedBy(2));
+
+        var resp = keyShareApiService.createKeyShare(serverKeyShare, expiryTime);
+
+        assertEquals(HttpStatus.CREATED.value(), resp.getStatusCode().value());
+        assertEquals("false", resp.getHeaders().getFirst(Constants.X_EXPIRY_TIME_ADJUSTED));
+        assertExpiryTimeStoredInDb(resp, expiryTime.toInstant(ZoneOffset.UTC));
+    }
+
+    @Test
+    void shouldCreateKeyShareWithExpiryTimeAdjustedWhenExceedingMax() {
+        var serverKeyShare = new ee.cyber.cdoc2.server.generated.model.KeyShare();
+        serverKeyShare.setShare(SHARE);
+        serverKeyShare.setRecipient(SHARE_RECIPIENT);
+
+        // double the configured max — guaranteed to exceed it regardless of its value
+        Duration maxDuration = Duration.parse(keyShareExpiryConfig.maxExpirationDuration());
+        LocalDateTime expiryTime = LocalDateTime.now().plus(maxDuration.multipliedBy(2));
+        Instant expectedAdjustedExpiry = Instant.now().plus(maxDuration);
+
+        var resp = keyShareApiService.createKeyShare(serverKeyShare, expiryTime);
+
+        assertEquals(HttpStatus.CREATED.value(), resp.getStatusCode().value());
+        assertEquals("true", resp.getHeaders().getFirst(Constants.X_EXPIRY_TIME_ADJUSTED));
+        assertExpiryTimeStoredInDb(resp, expectedAdjustedExpiry);
+    }
+
+    @Test
     void shouldFailToCreateKeyShareWithShortShare() {
         byte[] shortShare = new byte[10];
         var keyShare = new ee.cyber.cdoc2.client.model.KeyShare()
@@ -356,5 +401,20 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         entity.setNonce(Base64.getUrlDecoder().decode(SESSION_NONCE_FOR_TOKEN));
         entity.setCreatedAt(Instant.now());
         this.sessionNonceRepository.save(entity);
+    }
+
+    private void assertExpiryTimeStoredInDb(
+        org.springframework.http.ResponseEntity<Void> resp,
+        Instant expectedExpiry
+    ) {
+        String path = resp.getHeaders().getLocation().getPath();
+        String shareId = path.substring(path.lastIndexOf('/') + 1);
+
+        Optional<KeyShareDb> saved = shareRepository.findById(shareId);
+        assertTrue(saved.isPresent());
+        assertEquals(
+            expectedExpiry.truncatedTo(ChronoUnit.SECONDS),
+            saved.get().getExpiryTime().truncatedTo(ChronoUnit.SECONDS)
+        );
     }
 }
