@@ -225,7 +225,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     void shouldCreateKeyShare() throws Exception {
         var keyShare = createKeyShare();
 
-        String response = client.createKeyShare(keyShare);
+        String response = client.createKeyShare(keyShare, null);
 
         assertKeyShare(keyShare, response);
     }
@@ -357,7 +357,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     private void assertThrowsBadRequest(KeyShare keyShare) {
         ApiException ex = assertThrows(
             ApiException.class,
-            () -> client.createKeyShare(keyShare)
+            () -> client.createKeyShare(keyShare, null)
         );
         assertBadRequest(ex.getCode());
     }
