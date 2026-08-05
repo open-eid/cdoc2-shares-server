@@ -25,7 +25,7 @@ import ee.cyber.cdoc2.auth.EtsiIdentifier;
 import ee.cyber.cdoc2.auth.SIDCertificateUtil;
 import ee.cyber.cdoc2.auth.ShareAccessData;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -142,7 +142,7 @@ ShJ7Nyfd/u7m05tvbWULigwA6vNaLhTl
         Properties prop = new Properties();
         //generated during maven generate-test-resources phase, see pom.xml
         String windowsPathEscape = new String(TestData.class.getClassLoader()
-                .getResourceAsStream("test.properties").readAllBytes());
+            .getResourceAsStream("test.properties").readAllBytes());
         prop.load(new StringReader(windowsPathEscape.replace("\\", "\\\\")));
         String keysProperty = prop.getProperty("cdoc2.keys.dir");
         log.debug("Value for property cdoc2.keys.dir is {}", keysProperty);
@@ -182,8 +182,8 @@ ShJ7Nyfd/u7m05tvbWULigwA6vNaLhTl
         EtsiIdentifier etsi = new EtsiIdentifier("etsi/" + testSemanticsIdentifier);
 
         // Only have certificate and RSA private key for single
-        assertTrue("Only " + testSemanticsIdentifier + " is supported for auth ticket generation",
-            testSemanticsIdentifier.contains(eid));
+        assertTrue(testSemanticsIdentifier.contains(eid),
+            "Only " + testSemanticsIdentifier + " is supported for auth ticket generation");
 
 
         JWK jwk = JWK.parseFromPEMEncodedObjects(TEST_RSAKEY);

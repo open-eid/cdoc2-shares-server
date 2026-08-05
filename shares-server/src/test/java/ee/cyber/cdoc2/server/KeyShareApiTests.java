@@ -29,6 +29,8 @@ import ee.cyber.cdoc2.client.Cdoc2KeySharesApiClient;
 import ee.cyber.cdoc2.client.api.ApiException;
 import ee.cyber.cdoc2.client.model.KeyShare;
 import ee.cyber.cdoc2.client.model.NonceResponse;
+import ee.cyber.cdoc2.server.api.KeyShareApiService;
+import ee.cyber.cdoc2.server.config.KeyShareExpiryConfigProperties;
 import ee.cyber.cdoc2.server.config.MonitoringConfigProperties;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.SessionNonceDb;
@@ -70,10 +72,10 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     private Clock clock;
 
     @Autowired
-    private ee.cyber.cdoc2.server.api.KeyShareApiService keyShareApiService;
+    private KeyShareApiService keyShareApiService;
 
     @Autowired
-    private ee.cyber.cdoc2.server.config.KeyShareExpiryConfigProperties keyShareExpiryConfig;
+    private KeyShareExpiryConfigProperties keyShareExpiryConfig;
 
     @BeforeEach
     public void setup() throws Exception {

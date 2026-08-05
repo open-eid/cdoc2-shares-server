@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.11</version>
+			<version>42.7.13</version>
 		</dependency>
 
 		<dependency>
@@ -44,7 +44,7 @@
 			<plugin>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>5.0.2</version>
+				<version>5.0.3</version>
 				<configuration>
 					<propertyFile>liquibase.properties</propertyFile>
 					<changeLogFile>db/changelog/db.changelog-master.yaml</changeLogFile>
@@ -53,7 +53,7 @@
 					<dependency>
 						<groupId>org.postgresql</groupId>
 						<artifactId>postgresql</artifactId>
-						<version>42.7.11</version>
+						<version>42.7.13</version>
 					</dependency>
 				</dependencies>
 			</plugin>

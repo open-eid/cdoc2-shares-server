@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.3]
+
+### Improvements
+* Updated dependencies to latest stable versions
+* Migrated code for breaking API changes in Spring Boot `AntPathRequestMatcher` -> `PathPatternRequestMatcher`
+
 ## [0.7.2]
 
 ### Improvements
