@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.3</version>
+		<version>4.1.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>ee.cyber.cdoc2</groupId>
 	<artifactId>cdoc2-shares-server</artifactId>
-	<version>0.7.1</version>
+	<version>0.7.3</version>
 	<packaging>jar</packaging>
 
 	<name>cdoc2-shares-server</name>
@@ -28,16 +28,16 @@
 
 		<tests>!(pkcs11 | slow)</tests>
 
-		<spring-boot.version>4.0.3</spring-boot.version>
+		<spring-boot.version>4.1.0</spring-boot.version>
 		<!-- to overwrite sping-boot dependency define property from -->
 		<!-- https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html -->
 		<!-- https://docs.spring.io/spring-boot/maven-plugin/using.html#using.parent-pom -->
 
 
-		<org-testcontainers.version>1.21.4</org-testcontainers.version>
-		<micrometer.version>1.16.4</micrometer.version>
-		<logback-classic.version>1.5.32</logback-classic.version>
-        <logback.version>1.5.32</logback.version>
+		<org-testcontainers.version>2.0.5</org-testcontainers.version>
+		<micrometer.version>1.17.0</micrometer.version>
+		<logback-classic.version>1.5.38</logback-classic.version>
+		<logback.version>1.5.38</logback.version>
 	</properties>
 
 	<profiles>
@@ -184,6 +184,25 @@
 		</profile>
 	</profiles>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>12.0.30</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-bom</artifactId>
+				<version>12.0.30</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
@@ -273,33 +292,39 @@
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
 			<version>${org-testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>postgresql</artifactId>
+			<artifactId>testcontainers-postgresql</artifactId>
 			<version>${org-testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
-			<version>5.0.2</version>
+			<version>5.0.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-liquibase</artifactId>
+			<version>${spring-boot.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.5</version>
+			<version>5.6.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents.core5</groupId>
 			<artifactId>httpcore5</artifactId>
-			<version>5.4.2</version>
+			<version>5.4.3</version>
 		</dependency>
 
 		<dependency>
@@ -312,21 +337,21 @@
 		<dependency>
 			<groupId>ee.cyber.cdoc2</groupId>
 			<artifactId>cdoc2-auth-token</artifactId>
-			<version>0.7.0</version>
+			<version>0.7.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
-			<version>10.9</version>
+			<version>10.9.1</version>
 			<scope>compile</scope>
 		</dependency>
-		<!-- Force jackson-annotations to 2.20 which is compatible with
+		<!-- Force jackson-annotations to 2.22 which is compatible with
 		both tools.jackson 3.x (Spring Boot 4) and smart-id 2.x usage -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>2.20</version>
+			<version>2.22</version>
 		</dependency>
 
 		<dependency>
@@ -441,7 +466,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.5</version>
+				<version>3.5.6</version>
 				<configuration>
 					<trimStackTrace>false</trimStackTrace>
 					<groups>${tests}</groups>
@@ -451,7 +476,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.14</version>
+				<version>0.8.15</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -527,7 +552,8 @@
 			<plugin>
 				<groupId>org.honton.chas</groupId>
 				<artifactId>exists-maven-plugin</artifactId>
-				<version>0.13.0</version>
+				<!-- 0.15.0+ requires Maven 3.9.4+; CI runs maven:3.8.8 -->
+				<version>0.14.0</version>
 				<executions>
 					<execution>
 						<phase>install</phase>

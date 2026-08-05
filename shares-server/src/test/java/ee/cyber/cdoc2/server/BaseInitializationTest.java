@@ -16,16 +16,21 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.DockerClientFactory;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+
+import com.github.dockerjava.api.model.PruneType;
 
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 import ee.cyber.cdoc2.server.model.repository.KeyShareRepository;
 import ee.cyber.cdoc2.server.model.repository.SessionNonceRepository;
+import lombok.extern.slf4j.Slf4j;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 // Starts server on https
 // Starts PostgreSQL running on docker
+@Slf4j
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -40,21 +45,30 @@ abstract class BaseInitializationTest {
         "passwd"
     );
 
-    private static PostgreSQLContainer<?> postgresContainer;
+    private static PostgreSQLContainer postgresContainer;
 
     @BeforeAll
     public static void startPostgresContainer() {
-        //TODO This is a workaround for
-        // https://github.com/testcontainers/testcontainers-java/issues/11212
-        // proper solution would probably be upgrading to Testcontainers 2
-        System.setProperty("api.version", "1.44");
+        // Container is shared (not restarted) across all test classes extending this base class,
+        // as each subclass's @BeforeAll would otherwise start (and leak, since withReuse(true)
+        // opts out of Ryuk cleanup) a separate container, exhausting CI disk space.
+        if (postgresContainer != null && postgresContainer.isRunning()) {
+            return;
+        }
 
-        postgresContainer = new PostgreSQLContainer<>("postgres:14.17") //Jammy 22.04 default version
+        // Reclaim disk from containers/volumes left behind by earlier CI runs on this
+        // runner (its docker storage persists across jobs) before starting a new one.
+        try {
+            DockerClientFactory.lazyClient().pruneCmd(PruneType.CONTAINERS).exec();
+            DockerClientFactory.lazyClient().pruneCmd(PruneType.VOLUMES).exec();
+        } catch (Exception e) {
+            log.warn("Failed to prune stale docker containers/volumes", e);
+        }
+
+        postgresContainer = new PostgreSQLContainer("postgres:14.17") //Jammy 22.04 default version
             .withDatabaseName("integration-tests-db")
             .withUsername("sa")
-            .withPassword("sa")
-            .withReuse(true); //prevent pulling images repeatedly
-        //  Docker Hub imposes limits on anonymous users (100 pulls per 6 hours)
+            .withPassword("sa");
         postgresContainer.start();
     }
 

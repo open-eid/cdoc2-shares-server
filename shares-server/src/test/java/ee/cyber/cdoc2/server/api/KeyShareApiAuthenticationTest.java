@@ -189,7 +189,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());
         assertTrue(resp.hasBody());
-        assertTrue(resp.getHeaders().containsKey(Constants.X_EXPIRY_TIME_HEADER));
+        assertTrue(resp.getHeaders().containsHeader(Constants.X_EXPIRY_TIME_HEADER));
         assertEquals(ETSI_RECIPIENT, resp.getBody().getRecipient());
         assertArrayEquals(SHARE, resp.getBody().getShare());
     }
