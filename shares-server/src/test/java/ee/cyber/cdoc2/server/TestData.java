@@ -133,6 +133,9 @@ ShJ7Nyfd/u7m05tvbWULigwA6vNaLhTl
     public static final String TEST_IDENTIFIER = "40504040001";
     public static final String TEST_ETSI_RECIPIENT = "etsi/PNOEE-" + TEST_IDENTIFIER;
 
+    // identifier from above TEST_CERT_PEM, used as eid for generateTestAuthTicket()
+    public static final String TEST_CERT_IDENTIFIER = "30303039914";
+
     private TestData() {
         // utility class
     }
