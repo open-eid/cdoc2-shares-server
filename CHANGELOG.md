@@ -4,6 +4,7 @@
 
 ### Improvements
 * Updated cdoc2-client version
+* Code refinements and test coverage
 
 ## [0.7.3]
 
