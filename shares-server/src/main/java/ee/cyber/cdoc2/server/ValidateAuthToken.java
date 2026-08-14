@@ -5,13 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.boot.ssl.SslBundles;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,6 +23,7 @@ import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerJwkConf;
+import ee.cyber.cdoc2.server.config.TrustedIssuers;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 
@@ -32,9 +31,7 @@ import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
 @Component
 @RequiredArgsConstructor
 public class ValidateAuthToken {
-    private static final String SSL_BUNDLE_NAME = "sid-trusted-issuers";
-
-    private final SslBundles sslBundles;
+    private final TrustedIssuers trustedIssuers;
     private final AuthCertificateConfigProperties certificateConfig;
     private final RpServerConfigProperties rpServerConfigProperties;
     private final KeyShareNonceRepository shareNonceRepository;
@@ -86,10 +83,8 @@ public class ValidateAuthToken {
         HttpSignatureParams httpSignatureParams,
         URL requestUrl
     ) throws VerificationException {
-        KeyStore sidTrustedIssuers = sslBundles.getBundle(SSL_BUNDLE_NAME).getStores().getTrustStore();
-
         AuthTokenVerifier tokenVerifier = new AuthTokenVerifier(
-            sidTrustedIssuers,
+            trustedIssuers.getTrustStore(),
             certificateConfig.revocationChecksEnabled()
         );
 

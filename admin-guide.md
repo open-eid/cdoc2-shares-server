@@ -115,15 +115,15 @@ cdoc2.auth-x5c.sign-cert.forbidden=true
 
 # https://docs.spring.io/spring-boot/reference/features/ssl.html#features.ssl.pem
 # Smart-ID/Mobile-ID certificate trusted issuer
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.location=src/test/resources/sid-trusted-issuers/test_sid_trusted_issuers.jks
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.password=changeit
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.type=jks
+spring.ssl.bundle.jks.trusted-issuers.truststore.location=src/test/resources/trusted-issuers/test_trusted_issuers.jks
+spring.ssl.bundle.jks.trusted-issuers.truststore.password=changeit
+spring.ssl.bundle.jks.trusted-issuers.truststore.type=jks
 ```
 
 ### Creating auth token certificate trusted issuers truststore
 
 Maintaining trusted certificate issuers is out of scope of this document (depends on other infra),
-but for testing purposes [create-truststore_with_certs.sh](shares-server/src/test/resources/sid-trusted-issuers/create-truststore_with_certs.sh)
+but for testing purposes [create-truststore_with_certs.sh](shares-server/src/test/resources/trusted-issuers/create-truststore_with_certs.sh)
 script generates truststore for auth token issuers.
 
 ## Nonce expiry and clean-up

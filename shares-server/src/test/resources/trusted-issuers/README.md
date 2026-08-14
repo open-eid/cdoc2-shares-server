@@ -38,6 +38,6 @@ CA certificates can be downloaded and added to trust store according to
 Run script to create trusted store and add required certificates to it:
 
 ```bash
-cd shares-server/src/test/resources/sid-trusted-issuers
+cd shares-server/src/test/resources/trusted-issuers
 sh create-truststore_with_certs.sh
 ```

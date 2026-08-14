@@ -26,9 +26,9 @@ spring.datasource.username=${POSTGRES_USER}
 spring.datasource.password=${POSTGRES_PASSWORD}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.location=/config/sid_trusted_issuers.jks
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.password=changeit
-spring.ssl.bundle.jks.sid-trusted-issuers.truststore.type=jks
+spring.ssl.bundle.jks.trusted-issuers.truststore.location=/config/trusted_issuers.jks
+spring.ssl.bundle.jks.trusted-issuers.truststore.password=changeit
+spring.ssl.bundle.jks.trusted-issuers.truststore.type=jks
 
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.monitoring

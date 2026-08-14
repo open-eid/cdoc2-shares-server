@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class SidTrustedIssuers {
-    private static final String SID_TRUSTED_ISSUERS_BUNDLE_NAME = "sid-trusted-issuers";
+public class TrustedIssuers {
+    private static final String TRUSTED_ISSUERS_BUNDLE_NAME = "trusted-issuers";
 
     private final SslBundles sslBundles;
 
     public KeyStore getTrustStore() {
-        return sslBundles.getBundle(SID_TRUSTED_ISSUERS_BUNDLE_NAME).getStores().getTrustStore();
+        return sslBundles.getBundle(TRUSTED_ISSUERS_BUNDLE_NAME).getStores().getTrustStore();
     }
 }

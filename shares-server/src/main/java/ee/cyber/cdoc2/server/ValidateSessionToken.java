@@ -15,7 +15,7 @@ import ee.cyber.cdoc2.auth.TokenVerificationResponse;
 import ee.cyber.cdoc2.auth.exception.VerificationException;
 import ee.cyber.cdoc2.server.config.AuthCertificateConfigProperties;
 import ee.cyber.cdoc2.server.config.AuthServerJwkConf;
-import ee.cyber.cdoc2.server.config.SidTrustedIssuers;
+import ee.cyber.cdoc2.server.config.TrustedIssuers;
 import ee.cyber.cdoc2.server.model.repository.SessionNonceRepository;
 
 
@@ -24,7 +24,7 @@ import ee.cyber.cdoc2.server.model.repository.SessionNonceRepository;
 public class ValidateSessionToken {
 
     private final AuthServerJwkConf authServerJwkConf;
-    private final SidTrustedIssuers sidTrustedIssuers;
+    private final TrustedIssuers trustedIssuers;
     private final AuthCertificateConfigProperties certificateConfig;
     private final SessionNonceRepository sessionNonceRepository;
     private final Clock clock;
@@ -36,7 +36,7 @@ public class ValidateSessionToken {
         List<JWK> keys = authServerJwkConf.getPublicKeys();
 
         SessionTokenVerifier sessionTokenVerifier = new SessionTokenVerifier(
-            sidTrustedIssuers.getTrustStore(),
+            trustedIssuers.getTrustStore(),
             certificateConfig.revocationChecksEnabled(),
             clock
         );

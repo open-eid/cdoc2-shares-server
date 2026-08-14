@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.0]
+
+### Improvements
+* Updated cdoc2-client version
+
 ## [0.7.3]
 
 ### Improvements
