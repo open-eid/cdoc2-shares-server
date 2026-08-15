@@ -49,6 +49,8 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     private static final String SHARE_RECIPIENT = TEST_ETSI_RECIPIENT;
     private static final Instant INSTANT_NOW_SESSION_TOKEN_NOT_EXPIRED =
         Instant.parse("2026-04-22T12:30:00Z");
+    private static final Instant INSTANT_AFTER_SESSION_TOKEN_EXPIRED =
+        Instant.parse("2027-01-01T00:00:00Z");
     private static final int WIREMOCK_PORT = 8090;
 
     @SuppressWarnings("checkstyle:LineLength")
@@ -110,9 +112,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL
         ).getNonce();
-        String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
+        String xAuthToken = TestData.generateTestAuthToken(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
 
-        Optional<KeyShare> response = client.getKeyShare(shareId, xAuthTicket,
+        Optional<KeyShare> response = client.getKeyShare(shareId, xAuthToken,
             TestData.TEST_CERT_PEM,
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL,
@@ -131,12 +133,12 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     @Test
     void shouldFailToGetKeyShareWithBadRequest() {
         String shareId = "short";
-        String xAuthTicket = "";
+        String xAuthToken = "";
         String xAuthCert = "";
 
         ApiException ex = assertThrows(
             ApiException.class,
-            () -> client.getKeyShare(shareId, xAuthTicket, xAuthCert,
+            () -> client.getKeyShare(shareId, xAuthToken, xAuthCert,
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
                 SIGNATURE_VALIDATION_PARAMS_BASE64URL,
@@ -160,13 +162,13 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL
         ).getNonce();
-//        String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
+        String xAuthToken = TestData.generateTestAuthToken(TestData.TEST_CERT_IDENTIFIER, baseUrl, shareId, nonce);
 
         ApiException ex = assertThrows(
             ApiException.class,
             // null is checked by openapi generated code, but "" resulted NullPointerException, because
             // jose X509CertUtils.parseWithException("") returns null
-            () -> client.getKeyShare(shareId, "xAuthTicket", "",
+            () -> client.getKeyShare(shareId, xAuthToken, "",
                 SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
                 SID_SIGNING_CERTIFICATE_BASE64URL,
                 SIGNATURE_VALIDATION_PARAMS_BASE64URL,
@@ -180,7 +182,7 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     }
 
     @Test
-    void shouldFailWith400WhenGetKeyShareAuthTicketParamIsEmpty() {
+    void shouldFailWith400WhenGetKeyShareAuthTokenParamIsEmpty() {
         KeyShare keyShare = createKeyShare();
         keyShare.setRecipient(SHARE_RECIPIENT);
 
@@ -210,9 +212,12 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         String shareId = "SHARE_ID_MIN_LENGTH_SHOULD_BE_32";
 
         String nonce = "random";
-        String xAuthTicket = TestData.generateTestAuthTicket(TestData.TEST_IDENTIFIER, baseUrl, shareId, nonce);
+        String xAuthToken = TestData.generateTestAuthToken(TEST_CERT_IDENTIFIER, baseUrl, shareId, nonce);
 
-        Optional<KeyShare> keyShare = client.getKeyShare(shareId, xAuthTicket, TestData.TEST_CERT_PEM,
+        Optional<KeyShare> keyShare = client.getKeyShare(
+            shareId,
+            xAuthToken,
+            pemCertToBase64Url(TestData.TEST_CERT_PEM),
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SID_SIGNING_CERTIFICATE_BASE64URL,
             SIGNATURE_VALIDATION_PARAMS_BASE64URL,
@@ -307,10 +312,6 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
 
     @Test
     void shouldCreateKeyShareNonce() throws Exception {
-        System.out.println("Classpath");
-        System.out.println(System.getProperty("java.class.path"));
-        System.out.println("========================");
-
         var keyShare = createKeyShare();
 
         String shareId = this.saveKeyShare(keyShare).getShareId();
@@ -337,6 +338,85 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND.value(), ex.getCode());
+    }
+
+    @Test
+    void createNonceShouldReturnUnauthorizedWhenSessionTokenExpired() {
+        String shareId = "SHARE_ID_MIN_LENGTH_SHOULD_BE_32";
+        when(clock.instant()).thenReturn(INSTANT_AFTER_SESSION_TOKEN_EXPIRED);
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            () -> client.createNonce(
+                shareId,
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL
+            )
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
+    }
+
+    @Test
+    void getKeyShareShouldReturnUnauthorizedWhenSessionNonceMissing() throws ApiException {
+        var keyShare = createKeyShare();
+        String shareId = this.saveKeyShare(keyShare).getShareId();
+
+        String nonce = client.createNonce(
+            shareId,
+            SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+            SID_SIGNING_CERTIFICATE_BASE64URL
+        ).getNonce();
+        String xAuthToken =
+            TestData.generateTestAuthToken(TestData.TEST_CERT_IDENTIFIER, baseUrl, shareId, nonce);
+
+        sessionNonceRepository.deleteAll();
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            () -> client.getKeyShare(
+                shareId,
+                xAuthToken,
+                pemCertToBase64Url(TestData.TEST_CERT_PEM),
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL,
+                SIGNATURE_VALIDATION_PARAMS_BASE64URL,
+                new Cdoc2KeySharesApiClient.RpCountersignatureParams(null, null, null, null)
+            )
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
+    }
+
+    @Test
+    void getKeyShareShouldReturnUnauthorizedWhenSessionTokenExpired() throws ApiException {
+        var keyShare = createKeyShare();
+        String shareId = this.saveKeyShare(keyShare).getShareId();
+
+        String nonce = client.createNonce(
+            shareId,
+            SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+            SID_SIGNING_CERTIFICATE_BASE64URL
+        ).getNonce();
+        String xAuthToken =
+            TestData.generateTestAuthToken(TestData.TEST_CERT_IDENTIFIER, baseUrl, shareId, nonce);
+
+        when(clock.instant()).thenReturn(INSTANT_AFTER_SESSION_TOKEN_EXPIRED);
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            () -> client.getKeyShare(
+                shareId,
+                xAuthToken,
+                TestData.TEST_CERT_PEM,
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL,
+                SIGNATURE_VALIDATION_PARAMS_BASE64URL,
+                new Cdoc2KeySharesApiClient.RpCountersignatureParams(null, null, null, null)
+            )
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
     }
 
     private Cdoc2KeySharesApiClient createClient() throws Exception {
