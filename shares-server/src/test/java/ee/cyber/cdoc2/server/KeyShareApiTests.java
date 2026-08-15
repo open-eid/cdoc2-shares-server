@@ -425,6 +425,8 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         builder.withUsername(configProperties.username());
         builder.withPassword(configProperties.password());
         builder.withTrustKeyStore(CLIENT_TRUST_STORE);
+        builder.withReadTimeoutMs(10_000);
+        builder.withConnectTimeoutMs(10_000);
         builder.withDebuggingEnabled(true);
 
         return builder.build();

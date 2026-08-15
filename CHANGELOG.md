@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0]
+
+### Improvements
+* Updated cdoc2-client version
+* Updated cdoc2-auth-token version
+* Code refinements and test coverage
+
 ## [0.7.3]
 
 ### Improvements

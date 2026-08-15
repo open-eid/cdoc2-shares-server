@@ -34,6 +34,7 @@ import ee.cyber.cdoc2.server.config.KeyShareExpiryConfigProperties;
 import ee.cyber.cdoc2.server.config.NonceConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerConfigProperties;
 import ee.cyber.cdoc2.server.config.RpServerJwkConf;
+import ee.cyber.cdoc2.server.config.TrustedIssuers;
 import ee.cyber.cdoc2.server.model.entity.KeyShareDb;
 import ee.cyber.cdoc2.server.model.entity.KeyShareNonceDb;
 import ee.cyber.cdoc2.server.model.repository.KeyShareNonceRepository;
@@ -101,6 +102,9 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     private ResourceLoader resourceLoader;
 
     @Autowired
+    private TrustedIssuers trustedIssuers;
+
+    @Autowired
     private SslBundles sslBundles; // initialized from application.properties
 
     @Autowired
@@ -130,7 +134,7 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
             mockNonceRep,
             mockValidateSessionToken,
             new ValidateAuthToken(
-                sslBundles,
+                trustedIssuers,
                 new AuthCertificateConfigProperties(),
                 new RpServerConfigProperties(),
                 mockNonceRep,
