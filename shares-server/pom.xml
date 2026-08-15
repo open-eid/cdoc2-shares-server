@@ -11,7 +11,7 @@
 
 	<groupId>ee.cyber.cdoc2</groupId>
 	<artifactId>cdoc2-shares-server</artifactId>
-	<version>0.7.3</version>
+	<version>0.8.0</version>
 	<packaging>jar</packaging>
 
 	<name>cdoc2-shares-server</name>
