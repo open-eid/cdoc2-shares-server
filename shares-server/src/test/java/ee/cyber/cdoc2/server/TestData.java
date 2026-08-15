@@ -208,7 +208,6 @@ ShJ7Nyfd/u7m05tvbWULigwA6vNaLhTl
 
         token.sign(jwsSigner);
 
-        return token.createTicketForShareId(shareId);
+        return token.createTokenForShareId(shareId);
     }
-
 }
