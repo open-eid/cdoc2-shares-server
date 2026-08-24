@@ -46,6 +46,14 @@ Or run servers with `-Dlogging.config=target/test-classes/logback.xml` if you ne
 
 Note: to enable TLS handshake debugging, add `-Djavax.net.debug=ssl:handshake` option
 
+The logging format can be changed by providing logback configuration.
+An example OpenTelemetry-compatible Logback configuration is included in `otel-logback.xml`.
+To include the logback configuration, use the `-Dlogging.config` JVM option.
+
+Example of running the server with `otel-logback.xml`:
+```
+java -Dspring.config.location=config/application-local.properties -Dlogging.config=config/otel-logback.xml -jar target/cdoc2-shares-server-VER.jar
+```
 
 ### cdoc2-shares-server minimal testing
 
