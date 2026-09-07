@@ -10,12 +10,16 @@ import org.springframework.web.client.RestClient;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 @Component
 public class RpServerClient {
     private static final String WELL_KNOWN_PATH = ".well-known/jwks.jws";
     private final RestClient restClient;
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+        justification = "RestClient is immutable and thread-safe once built")
     public RpServerClient(@Qualifier("rpServerRestClient") RestClient restClient) {
         this.restClient = restClient;
     }

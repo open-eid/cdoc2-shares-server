@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Generated OpenAPI model/api code is not hand-written; exclude it from analysis -->
+    <Match>
+        <Package name="~.*\.generated(\..*)?"/>
+    </Match>
+</FindBugsFilter>
