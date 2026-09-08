@@ -27,7 +27,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException e) {
+        log.warn("Request validation has failed: {}", e.getMessage());
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Catch-all handler for exceptions that are not handled elsewhere. Ensures that unexpected
+     * errors are always logged (with stack trace, for troubleshooting) instead of failing silently,
+     * and that the client receives a generic HTTP 500 response without leaking internal details.
+     */
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> handleUnexpectedException(Exception e) {
+        log.error("Unexpected error while processing request", e);
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

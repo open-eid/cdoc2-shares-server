@@ -132,6 +132,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         try {
             verificationResponse = validateSessionToken.execute(xSessionToken, xSessionCert);
         } catch (VerificationException e) {
+            logAuthValidationFailure(e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
@@ -197,6 +198,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         try {
             validateSessionToken.execute(xSessionToken, xSessionCert);
         } catch (VerificationException e) {
+            logAuthValidationFailure(e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
@@ -230,12 +232,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
             tokenRecipient = verificationResponse.identifier().toString();
         } catch (CertificateException | VerificationException | MalformedURLException ex) {
-            if (log.isDebugEnabled()) {
-                log.debug("Auth validation has failed", ex);
-            } else {
-                log.info("Auth validation has failed with {}", ex.getMessage());
-            }
-
+            logAuthValidationFailure(ex);
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -259,6 +256,10 @@ public class KeyShareApiService implements KeySharesApiDelegate {
                 DateTimeFormatter.ISO_INSTANT.format(shareDb.getExpiryTime())
             )
             .body(createKeyShare(shareDb));
+    }
+
+    private static void logAuthValidationFailure(Exception ex) {
+        log.warn("Auth validation has failed: {}", ex.getMessage(), ex);
     }
 
     private ExpiryTimeData getExpiryTime(LocalDateTime xExpiryTime) {
@@ -367,7 +368,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     private void verifyCertificateUsagePurpose(X509Certificate cert) throws VerificationException {
         boolean[] keyUsages = cert.getKeyUsage();
         if (null == keyUsages) {
-            log.error("Certificate has no keyUsage");
             throw new VerificationException(
                 "Required extension keyUsage for certificate purpose is missing"
             );
@@ -379,14 +379,10 @@ public class KeyShareApiService implements KeySharesApiDelegate {
             boolean isSigningCert =
                 KeyUsage.fromExtensions(bcX509Cert.getExtensions()).hasUsages(signingCertBits);
             if (isSigningCert) {
-                String errMsg = "Signing certificate cannot be used for authentication";
-                log.error(errMsg);
                 throw new VerificationException("Signing certificate cannot be used for authentication");
             }
         } catch (CertificateEncodingException | IOException ex) {
-            String errMsg = "Failed to check certificate usage purpose";
-            log.error(errMsg);
-            throw new VerificationException(errMsg, ex);
+            throw new VerificationException("Failed to check certificate usage purpose", ex);
         }
     }
 

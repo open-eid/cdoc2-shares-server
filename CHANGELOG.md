@@ -4,6 +4,8 @@
 
 ### Improvements
 * added `logstash-logback-encoder` dependency to enable JSON logging
+* Added logging for previously unlogged exception handling paths (failed auth/session token
+  validation, JWK fetch failures) and a catch-all exception handler for unexpected errors
 
 ## [0.8.0]
 
