@@ -3,8 +3,8 @@
     {
       "kty": "EC",
       "crv": "P-256",
-      "x": "SIsDcu6c2CjOEIxZyh4ctZZA-zz4pFYv0duHPlNWinU",
-      "y": "50dC54PpOVtBHBGyzW1S6DgaBts-ywY3KgOclSIV97M",
+      "x": "IYJd5U4bUUAZdwmZZD7NkJJCMPokFJ3Nnr4wpddr1Ek",
+      "y": "hAkePhERzKgIT_RDgGyrfTBPFfNX3XCunBGSJCxTs2Y",
       "use": "enc",
       "kid": "rp-server-ec-key-2026"
     },
