@@ -26,6 +26,6 @@ public class AuthServerJwkConf {
             }
         }
 
-        return List.copyOf(this.publicKeys);
+        return this.publicKeys;
     }
 }

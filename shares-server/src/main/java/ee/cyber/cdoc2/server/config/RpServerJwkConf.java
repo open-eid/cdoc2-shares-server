@@ -26,6 +26,6 @@ public class RpServerJwkConf {
             }
         }
 
-        return List.copyOf(this.publicKeys);
+        return this.publicKeys;
     }
 }
