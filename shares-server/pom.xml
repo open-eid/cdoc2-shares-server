@@ -279,6 +279,30 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Tracing -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-otel</artifactId>
+		</dependency>
+
+		<!-- Spring Boot autoconfiguration for tracing (Tracer bean, MDC correlation, W3C propagation) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-micrometer-tracing</artifactId>
+		</dependency>
+
+		<!-- Spring Boot autoconfiguration wiring the OTel bridge + OTLP tracing exporter -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-micrometer-tracing-opentelemetry</artifactId>
+		</dependency>
+
+		<!-- OTLP exporter (Tempo, Jaeger, etc.) -->
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-exporter-otlp</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

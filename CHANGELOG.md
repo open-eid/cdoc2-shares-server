@@ -4,6 +4,8 @@
 
 ### Improvements
 * added `logstash-logback-encoder` dependency to enable JSON logging
+* Add support for tracing (`micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`,
+  `spring-boot-micrometer-tracing`, `spring-boot-micrometer-tracing-opentelemetry`)
 
 ## [0.8.0]
 
