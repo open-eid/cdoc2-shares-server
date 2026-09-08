@@ -85,12 +85,19 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
     private static final String MID_AUTH_TOKEN_SIGNING_CERTIFICATE_BASE64URL =
         "MIIDqDCCAy6gAwIBAgIQB9W11BzBABj-0d_AZx6UHzAKBggqhkjOPQQDAjBxMQswCQYDVQQGEwJFRTEbMBkGA1UECgwSU0sgSUQgU29sdXRpb25zIEFTMRcwFQYDVQRhDA5OVFJFRS0xMDc0NzAxMzEsMCoGA1UEAwwjVEVTVCBvZiBTSyBJRCBTb2x1dGlvbnMgRUlELVEgMjAyMUUwHhcNMjQwNjEyMDY0NTI4WhcNMjkwNjE2MDY0NTI3WjCBlTELMAkGA1UEBhMCRUUxLzAtBgNVBAMMJk1BUlkgw4ROTixPJ0NPTk5Fxb0txaBVU0xJSyBURVNUTlVNQkVSMSUwIwYDVQQEDBxPJ0NPTk5Fxb0txaBVU0xJSyBURVNUTlVNQkVSMRIwEAYDVQQqDAlNQVJZIMOETk4xGjAYBgNVBAUTEVBOT0VFLTUxMzA3MTQ5NTYwMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWlV1aVSXw6WhagWmFmXE_oe-0R1xZzrHyoiVlgKpGiJ8cwIQLogRGQnWY7NwgQvRHCBmsl99bj57h7SWnd03m6OCAYEwggF9MAkGA1UdEwQCMAAwHwYDVR0jBBgwFoAUScfc7QYUosdtnKbP11L9aOXoBBQwcAYIKwYBBQUHAQEEZDBiMDMGCCsGAQUFBzAChidodHRwOi8vYy5zay5lZS9URVNUX0VJRC1RXzIwMjFFLmRlci5jcnQwKwYIKwYBBQUHMAGGH2h0dHA6Ly9haWEuZGVtby5zay5lZS9laWRxMjAyMWUweAYDVR0gBHEwbzAIBgYEAI96AQIwYwYJKwYBBAHOHxIBMFYwVAYIKwYBBQUHAgEWSGh0dHBzOi8vd3d3LnNraWRzb2x1dGlvbnMuZXUvcmVzb3VyY2VzL2NlcnRpZmljYXRpb24tcHJhY3RpY2Utc3RhdGVtZW50LzA0BgNVHR8ELTArMCmgJ6AlhiNodHRwOi8vYy5zay5lZS90ZXN0X2VpZC1xXzIwMjFlLmNybDAdBgNVHQ4EFgQUj8KjnXvGQJCRYOd5LVfPku7QsZwwDgYDVR0PAQH_BAQDAgeAMAoGCCqGSM49BAMCA2gAMGUCMQCocXWDbBnkM3WEyBdv9Vm0A1MNRv08WrR192dRBcX42Kz5oiH0SdHRJv2ffeuEeSwCMEw2tSA3ClJv233Dl7rIYU_T6UG2NQhvDD5FhnP0umZRmVfAUQ6eVcmU8AhFtNJjwg==";
 
-    private static final String CS_RP_SIGNED_HASH = "L60KAeT4mpb4XLilMSIu6FMnGolXbnJZlg1hDuafPJg=";
     private static final String CS_RP_NAME = "DEMO";
+
+    private static final String CS_RP_SIGNED_HASH = "L60KAeT4mpb4XLilMSIu6FMnGolXbnJZlg1hDuafPJg=";
     private static final String CS_SIGNATURE_INPUT =
         "rp-sig=(\"x-rp-signed-hash\" \"x-rp-name\");created=1789011296;keyid=\"rp-server-ec-key-2026\"";
     private static final String CS_SIGNATURE =
-        "rp-sig=:ZKbi3KHCx31JFNEO7ex+yYi+4Kd4knjRXC38GtAaC7FIGla/a2crIz5JoZbeHWSVzjveDNx1mOy2iQG0Njz5RQ==:";
+        "rp-sig=:puxD/Y0EFnxWtM/+31JmBvLDqnWtsZH7hY6WsVF+5/sA7kDE9KytXvxnFbGYM5vfi2UcZuPAUT8R3vdQIvQivg==:";
+
+    private static final String MID_CS_RP_SIGNED_HASH = "sj2RtSo7c1tx+J00KWWkzyv4iQ2L2cuX0InnFFi+GAQ=";
+    private static final String MID_CS_SIGNATURE_INPUT =
+        "rp-sig=(\"x-rp-signed-hash\" \"x-rp-name\");created=1789011296;keyid=\"rp-server-ec-key-2026\"";
+    private static final String MID_CS_SIGNATURE =
+        "rp-sig=:l2Sfw/cWJ+XJEtaO6hkE/4gGECE8frNV7V31WMLPLptXv+2M5CDidOH3of5Uxmn3KokQ9mTvTjiLPCyDO62hDw==:";
 
     @Mock
     private KeyShareRepository mockShareRep;
@@ -237,10 +244,10 @@ class KeyShareApiAuthenticationTest extends KeyShareIntegrationTest {
             SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
             SESSION_TOKEN_SIGNING_CERTIFICATE_BASE64URL,
             null,
-            CS_RP_SIGNED_HASH,
+            MID_CS_RP_SIGNED_HASH,
             CS_RP_NAME,
-            CS_SIGNATURE_INPUT,
-            CS_SIGNATURE
+            MID_CS_SIGNATURE_INPUT,
+            MID_CS_SIGNATURE
         );
 
         assertTrue(resp.getStatusCode().is2xxSuccessful());
