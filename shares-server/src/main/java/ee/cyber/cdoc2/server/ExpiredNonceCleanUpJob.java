@@ -70,7 +70,7 @@ public final class ExpiredNonceCleanUpJob {
             }
         } catch (Exception e) {
             String errorMsg = "Expired " + nonceType + " deletion has failed";
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new JobFailureException(errorMsg, e);
         }
     }
