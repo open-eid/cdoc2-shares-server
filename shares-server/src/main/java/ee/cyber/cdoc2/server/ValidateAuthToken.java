@@ -105,6 +105,7 @@ public class ValidateAuthToken {
         try {
             shareAccessData = ShareAccessData.fromURL(verificationResponse.nonceUri().toURL());
         } catch (MalformedURLException e) {
+            log.error("Failed to parse nonce URI {} from auth token", verificationResponse.nonceUri(), e);
             throw new RuntimeException(e);
         }
 
@@ -170,7 +171,6 @@ public class ValidateAuthToken {
 
             checkNonceFromDB(shareAccessData.getShareId(), shareAccessData.getNonce());
         } catch (MalformedURLException ex) {
-            log.error("Error validating \"aud\" data", ex);
             throw new VerificationException("Error validating \"aud\" data", ex);
         }
     }
