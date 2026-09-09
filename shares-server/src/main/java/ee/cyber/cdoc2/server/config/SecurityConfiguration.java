@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.preauth.x509.SubjectX500PrincipalExtractor;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 
@@ -45,7 +46,8 @@ public class SecurityConfiguration {
             })
             .x509(x509 ->
                 x509
-                    .subjectPrincipalRegex("CN=(.*?)(?:,|$)")
+                    // extracts the CN attribute from the certificate's subject DN
+                    .x509PrincipalExtractor(new SubjectX500PrincipalExtractor())
                     .userDetailsService(userDetailsService())
             )
             .sessionManagement(sessionManagementConfigurer ->
