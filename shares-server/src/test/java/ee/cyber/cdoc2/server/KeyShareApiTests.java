@@ -358,6 +358,23 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     }
 
     @Test
+    void createNonceShouldReturnUnauthorizedWhenSessionNonceMissing() {
+        String shareId = "SHARE_ID_MIN_LENGTH_SHOULD_BE_32";
+        sessionNonceRepository.deleteAll();
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            () -> client.createNonce(
+                shareId,
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL
+            )
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
+    }
+
+    @Test
     void getKeyShareShouldReturnUnauthorizedWhenSessionNonceMissing() throws ApiException {
         var keyShare = createKeyShare();
         String shareId = this.saveKeyShare(keyShare).getShareId();
