@@ -21,6 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -40,6 +41,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static ee.cyber.cdoc2.server.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 
@@ -75,6 +77,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
 
     @Autowired
     private KeyShareApiService keyShareApiService;
+
+    @MockitoSpyBean
+    private ValidateAuthToken validateAuthToken;
 
     @Autowired
     private KeyShareExpiryConfigProperties keyShareExpiryConfig;
@@ -358,6 +363,23 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
     }
 
     @Test
+    void createNonceShouldReturnUnauthorizedWhenSessionNonceMissing() {
+        String shareId = "SHARE_ID_MIN_LENGTH_SHOULD_BE_32";
+        sessionNonceRepository.deleteAll();
+
+        ApiException ex = assertThrows(
+            ApiException.class,
+            () -> client.createNonce(
+                shareId,
+                SESSION_TOKEN_WITH_FILTERED_DISCLOSURES_BASE64URL,
+                SID_SIGNING_CERTIFICATE_BASE64URL
+            )
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
+    }
+
+    @Test
     void getKeyShareShouldReturnUnauthorizedWhenSessionNonceMissing() throws ApiException {
         var keyShare = createKeyShare();
         String shareId = this.saveKeyShare(keyShare).getShareId();
@@ -386,6 +408,10 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         );
 
         assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
+        // the 401 must come from session token validation, before auth token is even looked at,
+        // otherwise this test would also pass on an invalid/unparseable auth token, which is a
+        // different failure than the missing session nonce it is meant to cover
+        verifyNoInteractions(validateAuthToken);
     }
 
     @Test
@@ -417,6 +443,9 @@ class KeyShareApiTests extends KeyShareIntegrationTest {
         );
 
         assertEquals(HttpStatus.UNAUTHORIZED.value(), ex.getCode());
+        // same rationale as in getKeyShareShouldReturnUnauthorizedWhenSessionNonceMissing:
+        // pin the 401 to the expired session token, not to an invalid auth token
+        verifyNoInteractions(validateAuthToken);
     }
 
     private Cdoc2KeySharesApiClient createClient() throws Exception {
