@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -28,7 +28,7 @@
 
 		<tests>!(pkcs11 | slow)</tests>
 
-		<spring-boot.version>4.1.0</spring-boot.version>
+		<spring-boot.version>4.1.1</spring-boot.version>
 		<!-- to overwrite sping-boot dependency define property from -->
 		<!-- https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html -->
 		<!-- https://docs.spring.io/spring-boot/maven-plugin/using.html#using.parent-pom -->
@@ -342,13 +342,11 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.6.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents.core5</groupId>
 			<artifactId>httpcore5</artifactId>
-			<version>5.4.3</version>
 		</dependency>
 
 		<dependency>

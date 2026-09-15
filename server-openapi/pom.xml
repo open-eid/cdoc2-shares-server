@@ -23,7 +23,7 @@
         <swagger-annotations.version>2.2.52</swagger-annotations.version>
         <jackson.version>3.2.1</jackson.version>
         <maven-plugin.version>1.0.0</maven-plugin.version>
-        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
         <jackson-databind-nullable.version>0.2.10</jackson-databind-nullable.version>
         <spotbugs-annotations.version>4.10.3</spotbugs-annotations.version>
 

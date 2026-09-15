@@ -8,6 +8,7 @@
   validation, JWK fetch failures) and a catch-all exception handler for unexpected errors
 * Add support for tracing (`micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`,
   `spring-boot-micrometer-tracing`, `spring-boot-micrometer-tracing-opentelemetry`)
+* Dependency updates
 
 ## [0.8.0]
 
