@@ -34,7 +34,7 @@
 		<junit-jupiter.version>6.1.2</junit-jupiter.version>
 		<lombok.version>1.18.46</lombok.version>
 		<logback-classic.version>1.5.38</logback-classic.version>
-		<spring-boot.version>4.1.0</spring-boot.version>
+		<spring-boot.version>4.1.1</spring-boot.version>
 		<spotbugs-annotations.version>4.10.3</spotbugs-annotations.version>
 	</properties>
 
