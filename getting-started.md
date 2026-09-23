@@ -61,7 +61,7 @@ java -Dspring.config.location=config/application-local.properties -Dlogging.conf
 curl -k https://localhost:18443/actuator/info
 ```
 ```json
-{"build":{"artifact":"cdoc2-shares-server","name":"cdoc2-shares-server","time":"2025-02-12T12:12:27.587Z","version":"0.4.1-SNAPSHOT","group":"ee.cyber.cdoc2"},"system.time":"2025-02-12T12:22:24Z"}
+{"build":{"artifact":"cdoc2-shares-server","name":"cdoc2-shares-server","time":"2025-09-12T12:12:27.587Z","version":"0.8.1","group":"ee.cyber.cdoc2"},"system.time":"2026-09-12T12:22:24Z"}
 ```
 ```bash
 curl -k https://localhost:18443/actuator/health
@@ -86,8 +86,12 @@ Location: /key-shares/ee368ad654142dda1d9d8e00744df2c8
 curl -k -X GET https://localhost:8443/key-shares/ee368ad654142dda1d9d8e00744df2c8
 ```
 
-will give HTTP 401, as GET request requires `x-cdoc2-auth-ticket` and `x-cdoc2-auth-x5c` Header parameters
-that are not trivial task to create. 
+will give HTTP 401, as GET request requires `x-cdoc2-auth-token` and `x-cdoc2-auth-x5c`,
+`x-cdoc2-session-token`, `x-cdoc2-session-x5c` and `x-cdoc2-sid-rpv3-signature-parameters` (for 
+SmartId flow session tokens) header parameters that are not trivially created. 
+The easiest way to obtain valid headers params locally is to additionally bring up 
+`cdoc2-auth-server` and `cdoc2-rp-server` according to their respective guides and use 
+`java-ref-impl` CLI to perform a SID/MID encryption/decryption step. 
 
 ### cdoc2-shares-server additional testing
 
