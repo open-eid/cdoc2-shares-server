@@ -38,7 +38,11 @@ public class AuthServerRestClientConfiguration {
     }
 
     @Bean
-    public RestClient authServerRestClient(AppProperties props, SslBundles sslBundles)
+    public RestClient authServerRestClient(
+        AppProperties props,
+        SslBundles sslBundles,
+        RestClient.Builder builder
+    )
         throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         KeyStore trustStore = sslBundles.getBundle(SSL_BUNDLE_NAME).getStores().getTrustStore();
 
@@ -69,7 +73,7 @@ public class AuthServerRestClientConfiguration {
             .setConnectionManager(connectionManager)
             .build();
 
-        return RestClient.builder()
+        return builder
             .baseUrl(props.hostUri)
             .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient))
             .build();
