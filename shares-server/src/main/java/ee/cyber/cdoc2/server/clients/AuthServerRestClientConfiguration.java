@@ -13,7 +13,6 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.io.SocketConfig;
-import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -52,7 +51,6 @@ public class AuthServerRestClientConfiguration {
                 .setTlsSocketStrategy(
                     ClientTlsStrategyBuilder.create()
                         .setSslContext(sslContext)
-                        .setTlsVersions(TLS.V_1_3)
                         .buildClassic()
                 )
                 .setDefaultSocketConfig(
