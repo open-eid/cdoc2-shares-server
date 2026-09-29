@@ -162,6 +162,8 @@ docker run -v /path/to/config/logback.xml:/app/config/logback.xml \
 
 Example [logback.xml](src/test/resources/logback.xml)
 
+Example OpenTelemetry-compatible Logback configuration [otel-logback.xml](config/otel-logback.xml)
+
 More info on setting up Spring Boot logging: <https://docs.spring.io/spring-boot/reference/features/logging.html>
 
 ## Monitoring and metrics

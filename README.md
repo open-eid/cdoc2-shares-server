@@ -110,6 +110,13 @@ For more info see [admin-guide.md](admin-guide.md) and other existing configurat
 For end-to-end tests see
 [cdoc2-java-ref-impl/test/bats/README.md](https://github.com/open-eid/cdoc2-java-ref-impl/tree/master/test#running-smart-idmobile-id-tests-experimental)
 
+### Logging configuration
+
+The logging format can be changed by providing logback configuration. An example
+OpenTelemetry-compatible Logback configuration is included in `otel-logback.xml`. To include the
+logback configuration, use the `-Dlogging.config` JVM option or configuring it in the
+`application.properties`.
+
 ### GitHub release
 
 [Create release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release). Tag name is used as built image version, so it should start with shares-server version 
