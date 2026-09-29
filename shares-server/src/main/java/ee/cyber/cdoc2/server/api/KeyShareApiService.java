@@ -139,7 +139,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         Optional<KeyShareDb> keyShareOptional = this.keyShareRepository.findById(shareId);
 
         if (keyShareOptional.isEmpty()) {
-            log.error("Key share with shareId {} not found", shareId);
+            log.warn("Key share with shareId {} not found", shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         KeyShareDb keyShare = keyShareOptional.get();
@@ -147,9 +147,9 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         String sessionTokenSubject = verificationResponse.identifier().toString();
 
         if (!keyShare.getRecipient().equals(verificationResponse.identifier().toString())) {
-            log.warn("Key share with shareId {} and recipient {} doesn't match "
-                    + "session token subject {}",
-                shareId, keyShare.getRecipient(), sessionTokenSubject);
+            log.warn("Key share with shareId {} doesn't match "
+                    + "session token subject",
+                shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -186,12 +186,14 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         // openapi generator adds check for @NotNull, but not for isEmpty()
         // X509CertUtils.parseWithException will return null, when cert is empty string ("")
         if (xAuthCert == null || xAuthCert.isEmpty()) {
+            log.warn("xAuthCert header missing or empty");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         // empty ("") xAuthToken will eventually fail with IllegalArgumentException (401) when parsing sd-jwt
         // Fail here fast and be consistent with empty xAuthCert
         if (xAuthToken == null || xAuthToken.isEmpty()) {
+            log.warn("xAuthToken header missing or empty");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -238,15 +240,14 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
         Optional<KeyShareDb> shareDbOpt = this.keyShareRepository.findById(shareId);
         if (shareDbOpt.isEmpty()) {
-            log.debug("Key share with shareId {} not found", shareId);
+            log.warn("Key share with shareId {} not found", shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         KeyShareDb shareDb = shareDbOpt.get();
         //check that keyShare can be accessed by auth token issuer
         if (!tokenRecipient.equals(shareDb.getRecipient())) {
-            log.warn("Key share with shareId {} and recipient {} doesn't match token issuer {}",
-                shareId, shareDb.getRecipient(), tokenRecipient);
+            log.warn("Key share with shareId {} doesn't match token issuer", shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -259,7 +260,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     }
 
     private static void logAuthValidationFailure(Exception ex) {
-        log.warn("Auth validation has failed: {}", ex.getMessage(), ex);
+        log.warn("Auth validation has failed: {}", ex.getMessage());
     }
 
     private ExpiryTimeData getExpiryTime(LocalDateTime xExpiryTime) {
