@@ -147,9 +147,9 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         String sessionTokenSubject = verificationResponse.identifier().toString();
 
         if (!keyShare.getRecipient().equals(verificationResponse.identifier().toString())) {
-            log.warn("Key share with shareId {} and recipient {} doesn't match "
-                    + "session token subject {}",
-                shareId, keyShare.getRecipient(), sessionTokenSubject);
+            log.warn("Key share with shareId {} doesn't match "
+                    + "session token subject",
+                shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -245,8 +245,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         KeyShareDb shareDb = shareDbOpt.get();
         //check that keyShare can be accessed by auth token issuer
         if (!tokenRecipient.equals(shareDb.getRecipient())) {
-            log.warn("Key share with shareId {} and recipient {} doesn't match token issuer {}",
-                shareId, shareDb.getRecipient(), tokenRecipient);
+            log.warn("Key share with shareId {} doesn't match token issuer", shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
