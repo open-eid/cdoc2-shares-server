@@ -186,12 +186,14 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         // openapi generator adds check for @NotNull, but not for isEmpty()
         // X509CertUtils.parseWithException will return null, when cert is empty string ("")
         if (xAuthCert == null || xAuthCert.isEmpty()) {
+            log.warn("xAuthCert header missing or empty");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         // empty ("") xAuthToken will eventually fail with IllegalArgumentException (401) when parsing sd-jwt
         // Fail here fast and be consistent with empty xAuthCert
         if (xAuthToken == null || xAuthToken.isEmpty()) {
+            log.warn("xAuthToken header missing or empty");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
