@@ -105,8 +105,8 @@ public class ValidateAuthToken {
         try {
             shareAccessData = ShareAccessData.fromURL(verificationResponse.nonceUri().toURL());
         } catch (MalformedURLException e) {
-            log.error("Failed to parse nonce URI {} from auth token", verificationResponse.nonceUri(), e);
-            throw new RuntimeException(e);
+            String message = "Unable to parse nonce URI: " + verificationResponse.nonceUri();
+            throw new VerificationException(message);
         }
 
         checkTokenAudience(shareId, shareAccessData, requestUrl);
