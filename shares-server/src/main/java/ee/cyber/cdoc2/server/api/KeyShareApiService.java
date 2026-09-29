@@ -139,7 +139,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         Optional<KeyShareDb> keyShareOptional = this.keyShareRepository.findById(shareId);
 
         if (keyShareOptional.isEmpty()) {
-            log.error("Key share with shareId {} not found", shareId);
+            log.warn("Key share with shareId {} not found", shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         KeyShareDb keyShare = keyShareOptional.get();
@@ -238,7 +238,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
 
         Optional<KeyShareDb> shareDbOpt = this.keyShareRepository.findById(shareId);
         if (shareDbOpt.isEmpty()) {
-            log.debug("Key share with shareId {} not found", shareId);
+            log.warn("Key share with shareId {} not found", shareId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -259,7 +259,7 @@ public class KeyShareApiService implements KeySharesApiDelegate {
     }
 
     private static void logAuthValidationFailure(Exception ex) {
-        log.warn("Auth validation has failed: {}", ex.getMessage(), ex);
+        log.warn("Auth validation has failed: {}", ex.getMessage());
     }
 
     private ExpiryTimeData getExpiryTime(LocalDateTime xExpiryTime) {
