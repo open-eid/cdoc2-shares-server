@@ -144,8 +144,6 @@ public class KeyShareApiService implements KeySharesApiDelegate {
         }
         KeyShareDb keyShare = keyShareOptional.get();
 
-        String sessionTokenSubject = verificationResponse.identifier().toString();
-
         if (!keyShare.getRecipient().equals(verificationResponse.identifier().toString())) {
             log.warn("Key share with shareId {} doesn't match "
                     + "session token subject",
