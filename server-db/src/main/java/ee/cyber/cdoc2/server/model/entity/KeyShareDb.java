@@ -1,5 +1,6 @@
 package ee.cyber.cdoc2.server.model.entity;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -32,6 +33,7 @@ import ee.cyber.cdoc2.server.model.Crypto;
 @EntityListeners(AuditingEntityListener.class)
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
+@SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
 public class KeyShareDb extends AuditEntity {
 
     @PrePersist

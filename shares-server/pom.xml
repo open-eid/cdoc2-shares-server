@@ -447,7 +447,7 @@
 					<consoleOutput>true</consoleOutput>
 
 					<failsOnError>true</failsOnError>
-					<failOnViolation>false</failOnViolation>
+					<failOnViolation>true</failOnViolation>
 
 					<linkXRef>false</linkXRef>
 				</configuration>

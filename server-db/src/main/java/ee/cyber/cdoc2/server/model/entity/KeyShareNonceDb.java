@@ -1,5 +1,6 @@
 package ee.cyber.cdoc2.server.model.entity;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -29,6 +30,7 @@ import ee.cyber.cdoc2.server.model.Crypto;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @Table(name = "key_material_share_nonce")
+@SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
 public class KeyShareNonceDb extends AuditEntity {
 
     @PrePersist
