@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2]
+
+### Improvements
+* TLS_1.3 no longer forced for infrastructure connections
+* logging and tracing improvements
+
 ## [0.8.1]
 
 ### Improvements
