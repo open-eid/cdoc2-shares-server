@@ -174,7 +174,7 @@
                         <enumUnknownDefaultCase>true</enumUnknownDefaultCase>
                         <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
                         <!-- requestMappingMode: https://github.com/OpenAPITools/openapi-generator/pull/13838 -->
-                        <requestMappingMode>none</requestMappingMode>&gt;
+                        <requestMappingMode>none</requestMappingMode>
                     </configOptions>
                     <typeMappings>
                         <typeMapping>duration=Duration</typeMapping>
@@ -182,18 +182,6 @@
                     <importMappings>Duration=java.time.Duration</importMappings>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
-                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <proc>none</proc>
-                </configuration>
-            </plugin>
-
         </plugins>
 
     </build>
