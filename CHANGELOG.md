@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.8.3]
+* Upgrade to Java 21
+
 ## [0.8.2]
 
 ### Improvements
