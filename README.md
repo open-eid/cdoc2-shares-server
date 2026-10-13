@@ -14,7 +14,7 @@ and [DigiDoc4-Client](https://github.com/open-eid/DigiDoc4-Client) for CDOC2 enc
 
 
 ## Preconditions for building
-* Java 17
+* Java 21
 * Maven 3.8.x
 * Docker available and running (required for running tests, use `-Dmaven.test.skip=true` to skip)
 
